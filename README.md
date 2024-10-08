@@ -34,8 +34,64 @@ commands instead of directly calling the corresponding scripts.
 
 
 ## Docker
-TODO!
+### A. Building Docker Image with CUDA 12 and Python 3.12
+```bash
+docker build -t ctrlaltdiffuse-cuda12 -f docker/Dockerfile.cuda12 .
+```
+### B. Building Docker Image with CUDA 11 and Python 3.12
 
+```bash
+docker build -t ctrlaltdiffuse-cuda11 -f docker/Dockerfile.cuda11 .
+```
+## Running Containers in Different Modes
+
+### A. Running in Interactive Mode
+
+Use the interactive mode to run the container and manually execute commands inside it.
+
+#### CUDA 12 and Python 3.12
+
+```bash
+docker run --gpus all -it ctrlaltdiffuse-cuda12
+```
+
+#### CUDA 11 and Python 3.12
+
+```bash
+docker run --gpus all -it ctrlaltdiffuse-cuda11
+```
+
+### B. Running in Training Mode
+
+To start training directly, use the following commands to run the container.
+
+#### CUDA 12 and Python 3.12
+
+```bash
+docker run --gpus all ctrlaltdiffuse-cuda12 python src/diffuse_trainer.py --dataset-type celebs --dataset-path ./dataset --output ./output
+```
+
+#### CUDA 11 and Python 3.12
+
+```bash
+docker run --gpus all ctrlaltdiffuse-cuda11 python src/diffuse_trainer.py --dataset-type celebs --dataset-path ./dataset --output ./output
+```
+
+### C. Running in Image Generation Mode
+
+To run the container for image generation using a trained model:
+
+#### CUDA 12 and Python 3.12
+
+```bash
+docker run --gpus all ctrlaltdiffuse-cuda12 python src/diffuse_generator.py --checkpoints ./output/checkpoint.pth --image_dimensions 256 256
+```
+
+#### CUDA 11 and Python 3.12
+
+```bash
+docker run --gpus all ctrlaltdiffuse-cuda11 python src/diffuse_generator.py --checkpoints ./output/checkpoint.pth --image_dimensions 256 256
+```
 # Quickstart
 If you have not installed the repository as a package, you can call still run the python scripts directly.\
 For example instead of ```diffuse-train -h```, run ```python diffuse_train.py -h``` when in the correct directory.
