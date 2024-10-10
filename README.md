@@ -34,11 +34,11 @@ commands instead of directly calling the corresponding scripts.
 
 
 ## Docker
-### A. Building Docker Image with CUDA 12 and Python 3.12
+### A. Building Docker Image with CUDA 12.1 and Python 3.11
 ```bash
 docker build -t ctrlaltdiffuse-cuda12 -f docker/Dockerfile.cuda12 .
 ```
-### B. Building Docker Image with CUDA 11 and Python 3.12
+### B. Building Docker Image with CUDA 11.8 and Python 3.11
 
 ```bash
 docker build -t ctrlaltdiffuse-cuda11 -f docker/Dockerfile.cuda11 .
@@ -49,13 +49,13 @@ docker build -t ctrlaltdiffuse-cuda11 -f docker/Dockerfile.cuda11 .
 
 Use the interactive mode to run the container and manually execute commands inside it.
 
-#### CUDA 12 and Python 3.12
+#### CUDA 12.1 and Python 3.11
 
 ```bash
 docker run --gpus all -it ctrlaltdiffuse-cuda12
 ```
 
-#### CUDA 11 and Python 3.12
+#### CUDA 11.8 and Python 3.11
 
 ```bash
 docker run --gpus all -it ctrlaltdiffuse-cuda11
@@ -65,13 +65,13 @@ docker run --gpus all -it ctrlaltdiffuse-cuda11
 
 To start training directly, use the following commands to run the container.
 
-#### CUDA 12 and Python 3.12
+#### CUDA 12.1 and Python 3.11
 
 ```bash
 docker run --gpus all ctrlaltdiffuse-cuda12 python src/diffuse_trainer.py --dataset-type celebs --dataset-path ./dataset --output ./output
 ```
 
-#### CUDA 11 and Python 3.12
+#### CUDA 11.8 and Python 3.11
 
 ```bash
 docker run --gpus all ctrlaltdiffuse-cuda11 python src/diffuse_trainer.py --dataset-type celebs --dataset-path ./dataset --output ./output
@@ -81,13 +81,13 @@ docker run --gpus all ctrlaltdiffuse-cuda11 python src/diffuse_trainer.py --data
 
 To run the container for image generation using a trained model:
 
-#### CUDA 12 and Python 3.12
+#### CUDA 12.1 and Python 3.11
 
 ```bash
 docker run --gpus all ctrlaltdiffuse-cuda12 python src/diffuse_generator.py --checkpoints ./output/checkpoint.pth --image_dimensions 256 256
 ```
 
-#### CUDA 11 and Python 3.12
+#### CUDA 11.8 and Python 3.11
 
 ```bash
 docker run --gpus all ctrlaltdiffuse-cuda11 python src/diffuse_generator.py --checkpoints ./output/checkpoint.pth --image_dimensions 256 256
