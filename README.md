@@ -34,64 +34,67 @@ commands instead of directly calling the corresponding scripts.
 
 
 ## Docker
-### A. Building Docker Image with CUDA 12.1 and Python 3.11
-```bash
-docker build -t ctrlaltdiffuse-cuda12 -f docker/Dockerfile.cuda12 .
-```
-### B. Building Docker Image with CUDA 11.8 and Python 3.11
+
+### A. Building Docker Images with CUDA Support
+
+You can build Docker images with either CUDA 11.8 or CUDA 12.1 support. The default version is CUDA 11.8, but you can specify CUDA 12.1 by using a build argument.
+
+#### Build CUDA 11.8 Image (default)
 
 ```bash
-docker build -t ctrlaltdiffuse-cuda11 -f docker/Dockerfile.cuda11 .
+docker build -t ctrlaltdiffuse-cuda:cuda11 --build-arg CUDA_VERSION=11.8 -f docker/Dockerfile .
 ```
-## Running Containers in Different Modes
 
-### A. Running in Interactive Mode
-
-Use the interactive mode to run the container and manually execute commands inside it.
-
-#### CUDA 12.1 and Python 3.11
+#### Build CUDA 12.1 Image
 
 ```bash
-docker run --gpus all -it ctrlaltdiffuse-cuda12
+docker build -t ctrlaltdiffuse-cuda:cuda12 --build-arg CUDA_VERSION=12.1 -f docker/Dockerfile .
 ```
 
-#### CUDA 11.8 and Python 3.11
+## Quickstart: Running the Container in Different Modes
+
+### A. Starting the Docker Container
+
+Use the following command to start the Docker container with GPU support, increased memory allocation, and mounted data/checkpoints.
 
 ```bash
-docker run --gpus all -it ctrlaltdiffuse-cuda11
+docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda11
 ```
+
+- **`--shm-size=16g`**: Increases the shared memory size to 16 GB, which may be necessary for larger models.
+- **`-v /path/to/data:/workspace/data`** and **`-v /path/to/checkpoints:/workspace/checkpoints`**: Mounts the data and checkpoints from the host system into the container's `/workspace` directory.
+
+To use CUDA 12.1, replace `ctrlaltdiffuse-cuda:cuda11` with `ctrlaltdiffuse-cuda:cuda12` in the command above.
 
 ### B. Running in Training Mode
 
-To start training directly, use the following commands to run the container.
-
-#### CUDA 12.1 and Python 3.11
+To start training directly within the container, use the following command:
 
 ```bash
-docker run --gpus all ctrlaltdiffuse-cuda12 python src/diffuse_trainer.py --dataset-type celebs --dataset-path ./dataset --output ./output
+docker run --gpus all ctrlaltdiffuse-cuda:cuda11 diffuse-train --dataset-type celebs --dataset-path ./dataset --output ./output
 ```
 
-#### CUDA 11.8 and Python 3.11
+For CUDA 12.1, use:
 
 ```bash
-docker run --gpus all ctrlaltdiffuse-cuda11 python src/diffuse_trainer.py --dataset-type celebs --dataset-path ./dataset --output ./output
+docker run --gpus all ctrlaltdiffuse-cuda:cuda12 diffuse-train --dataset-type celebs --dataset-path ./dataset --output ./output
 ```
 
 ### C. Running in Image Generation Mode
 
-To run the container for image generation using a trained model:
-
-#### CUDA 12.1 and Python 3.11
+To run the container for image generation using a trained model, use the following command:
 
 ```bash
-docker run --gpus all ctrlaltdiffuse-cuda12 python src/diffuse_generator.py --checkpoints ./output/checkpoint.pth --image_dimensions 256 256
+docker run --gpus all ctrlaltdiffuse-cuda:cuda11 diffuse-generate --checkpoints ./output/checkpoint.pth --image_dimensions 256 256
 ```
 
-#### CUDA 11.8 and Python 3.11
+For CUDA 12.1, use:
 
 ```bash
-docker run --gpus all ctrlaltdiffuse-cuda11 python src/diffuse_generator.py --checkpoints ./output/checkpoint.pth --image_dimensions 256 256
+docker run --gpus all ctrlaltdiffuse-cuda:cuda12 diffuse-generate --checkpoints ./output/checkpoint.pth --image_dimensions 256 256
 ```
+
+
 # Quickstart
 If you have not installed the repository as a package, you can call still run the python scripts directly.\
 For example instead of ```diffuse-train -h```, run ```python diffuse_train.py -h``` when in the correct directory.
