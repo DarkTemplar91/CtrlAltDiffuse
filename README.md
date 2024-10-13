@@ -74,6 +74,7 @@ docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/t
 - **`--shm-size=16g`**: Increases the shared memory size to 16 GB, which may be necessary for larger models.
 - **`-v /path/to/data:/workspace/data`** and **`-v /path/to/checkpoints:/workspace/checkpoints`**: Mounts the data and checkpoints folders from the host system into the container's `/workspace` directory.
 
+
 To use CUDA 12.1, replace `ctrlaltdiffuse-cuda:cuda11` with `ctrlaltdiffuse-cuda:cuda12` in the command above.
 
 ### B. Running in Training Mode
