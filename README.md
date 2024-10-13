@@ -34,7 +34,66 @@ commands instead of directly calling the corresponding scripts.
 
 
 ## Docker
-TODO!
+
+### A. Building Docker Images with CUDA Support
+
+You can build Docker images with either CUDA 11.8 or CUDA 12.1 support. The default version is CUDA 11.8, but you can specify CUDA 12.1 by using a build argument.
+
+#### Build CUDA 11.8 Image (default)
+
+```bash
+docker build -t ctrlaltdiffuse-cuda:cuda11 --build-arg CUDA_VERSION=11.8 -f docker/Dockerfile .
+```
+
+#### Build CUDA 12.1 Image
+
+```bash
+docker build -t ctrlaltdiffuse-cuda:cuda12 --build-arg CUDA_VERSION=12.1 -f docker/Dockerfile .
+```
+
+## Quickstart: Running the Container in Different Modes
+
+### A. Starting the Docker Container
+
+Use the following command to start the Docker container with GPU support, increased memory allocation, and mounted data/checkpoints.
+
+```bash
+docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda11
+```
+
+- **`--shm-size=16g`**: Increases the shared memory size to 16 GB, which may be necessary for larger models.
+- **`-v /path/to/data:/workspace/data`** and **`-v /path/to/checkpoints:/workspace/checkpoints`**: Mounts the data and checkpoints from the host system into the container's `/workspace` directory.
+
+To use CUDA 12.1, replace `ctrlaltdiffuse-cuda:cuda11` with `ctrlaltdiffuse-cuda:cuda12` in the command above.
+
+### B. Running in Training Mode
+
+To start training directly within the container, use the following command:
+
+```bash
+docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda11 diffuse-train --dataset-type celebs --dataset-path ./data --output ./output
+```
+
+For CUDA 12.1, use:
+
+```bash
+docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda12 diffuse-train --dataset-type celebs --dataset-path ./data --output ./output
+```
+
+### C. Running in Image Generation Mode
+
+To run the container for image generation using a trained model, use the following command:
+
+```bash
+docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda11 diffuse-generate --checkpoints ./checkpoints/checkpoint.pth --image_dimensions 256 256
+```
+
+For CUDA 12.1, use:
+
+```bash
+docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda12 diffuse-generate --checkpoints ./checkpoints/checkpoint.pth --image_dimensions 256 256
+```
+
 
 # Quickstart
 If you have not installed the repository as a package, you can call still run the python scripts directly.\
