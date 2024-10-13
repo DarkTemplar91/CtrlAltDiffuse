@@ -71,13 +71,13 @@ To use CUDA 12.1, replace `ctrlaltdiffuse-cuda:cuda11` with `ctrlaltdiffuse-cuda
 To start training directly within the container, use the following command:
 
 ```bash
-docker run --gpus all ctrlaltdiffuse-cuda:cuda11 diffuse-train --dataset-type celebs --dataset-path ./dataset --output ./output
+docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda11 diffuse-train --dataset-type celebs --dataset-path ./data --output ./output
 ```
 
 For CUDA 12.1, use:
 
 ```bash
-docker run --gpus all ctrlaltdiffuse-cuda:cuda12 diffuse-train --dataset-type celebs --dataset-path ./dataset --output ./output
+docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda12 diffuse-train --dataset-type celebs --dataset-path ./data --output ./output
 ```
 
 ### C. Running in Image Generation Mode
@@ -85,13 +85,13 @@ docker run --gpus all ctrlaltdiffuse-cuda:cuda12 diffuse-train --dataset-type ce
 To run the container for image generation using a trained model, use the following command:
 
 ```bash
-docker run --gpus all ctrlaltdiffuse-cuda:cuda11 diffuse-generate --checkpoints ./output/checkpoint.pth --image_dimensions 256 256
+docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda11 diffuse-generate --checkpoints ./checkpoints/checkpoint.pth --image_dimensions 256 256
 ```
 
 For CUDA 12.1, use:
 
 ```bash
-docker run --gpus all ctrlaltdiffuse-cuda:cuda12 diffuse-generate --checkpoints ./output/checkpoint.pth --image_dimensions 256 256
+docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda12 diffuse-generate --checkpoints ./checkpoints/checkpoint.pth --image_dimensions 256 256
 ```
 
 
