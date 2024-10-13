@@ -18,7 +18,7 @@ For CUDA 12.1 run the following command:
 ```
 conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
 ```
-### Clone repository
+### A. Clone repository
 ```
 git clone https://github.com/DarkTemplar91/CtrlAltDiffuse.git
 cd CtrlAltDiffuse
@@ -32,6 +32,12 @@ After cloning the repository, you have two options:
 If you opted to install it as a package, you can use the ```diffuse-train``` and ```diffuse-generate```
 commands instead of directly calling the corresponding scripts.  
 
+### B. Install package directly
+After setting up the base environment by installing the correct version of PyTorch, you can also install the library
+directly as a pip package:
+```
+pip install git+https://github.com/DarkTemplar91/CtrlAltDiffuse.git
+```
 
 ## Docker
 
@@ -51,18 +57,22 @@ docker build -t ctrlaltdiffuse-cuda:cuda11 --build-arg CUDA_VERSION=11.8 -f dock
 docker build -t ctrlaltdiffuse-cuda:cuda12 --build-arg CUDA_VERSION=12.1 -f docker/Dockerfile .
 ```
 
+The docker images are also available in the "Packages" section in GitHub.
+
 ## Quickstart: Running the Container in Different Modes
 
 ### A. Starting the Docker Container
 
-Use the following command to start the Docker container with GPU support, increased memory allocation, and mounted data/checkpoints.
+Use the following command to start the Docker container with GPU support, increased memory allocation, and mounted data/checkpoints.\
+This command will open an interactive terminal where you can use the ```diffuse-train``` and ```diffuse-generate```
+commands directly.
 
 ```bash
 docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda11
 ```
 
 - **`--shm-size=16g`**: Increases the shared memory size to 16 GB, which may be necessary for larger models.
-- **`-v /path/to/data:/workspace/data`** and **`-v /path/to/checkpoints:/workspace/checkpoints`**: Mounts the data and checkpoints from the host system into the container's `/workspace` directory.
+- **`-v /path/to/data:/workspace/data`** and **`-v /path/to/checkpoints:/workspace/checkpoints`**: Mounts the data and checkpoints folders from the host system into the container's `/workspace` directory.
 
 To use CUDA 12.1, replace `ctrlaltdiffuse-cuda:cuda11` with `ctrlaltdiffuse-cuda:cuda12` in the command above.
 
@@ -85,13 +95,13 @@ docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/t
 To run the container for image generation using a trained model, use the following command:
 
 ```bash
-docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda11 diffuse-generate --checkpoints ./checkpoints/checkpoint.pth --image_dimensions 256 256
+docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda11 diffuse-generate --checkpoints ./checkpoints/checkpoint.pth --image_resolution 256
 ```
 
 For CUDA 12.1, use:
 
 ```bash
-docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda12 diffuse-generate --checkpoints ./checkpoints/checkpoint.pth --image_dimensions 256 256
+docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda12 diffuse-generate --checkpoints ./checkpoints/checkpoint.pth --image_resolution 256
 ```
 
 
@@ -115,8 +125,8 @@ To see all arguments, call ```diffuse-train -h``` or see the following list:
   Path to load checkpoint of trained model; None if not used.
   ### --output
   Path to store the checkpoint of the trained model. "./output" by default.
-  ### --image_dimensions
-  Input image dimensions (height, width). Default: (256, 256)
+  ### --image_resolution
+  Input image resolution. This will be the smaller edge of the image. Default: 256
   ### --batch_size
   Number of samples per batch. Default: 32
   ### --epochs
@@ -139,6 +149,19 @@ To see all arguments, call ```diffuse-generate -h``` or see the following list:
 
 ### --checkpoints
 Path to the trained model
-### --image_dimensions
-The dimension of the generated image. Default: (256, 256)
+### --image_resolution
+The resolution of the generated image. Default: 256
 </details>
+
+# Administrative Informations
+
+## Team members
+
+- Somodi István - IXH8RO
+- Szász Erik - B7RBBU
+
+## Related works
+- https://arxiv.org/abs/2006.11239
+- https://arxiv.org/abs/2010.02502
+- https://keras.io/examples/generative/ddim/
+- https://github.com/ermongroup/ddim
