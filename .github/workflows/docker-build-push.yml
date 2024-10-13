@@ -39,7 +39,7 @@ jobs:
           context: .
           file: ./docker/Dockerfile
           push: true
-          tags: ghcr.io/ctrlaltdiffuse-cuda12:latest
+          tags: ghcr.io/ctrlaltdiffuse/ctrlaltdiffuse-cuda12:latest
           build-args: |
             CUDA_VERSION=12.1
 
@@ -50,6 +50,6 @@ jobs:
           context: .
           file: ./docker/Dockerfile
           push: true
-          tags: ghcr.io/ctrlaltdiffuse-cuda11:latest
+          tags: ghcr.io/ctrlaltdiffuse/ctrlaltdiffuse-cuda11:latest
           build-args: |
             CUDA_VERSION=11.8
