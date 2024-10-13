@@ -22,14 +22,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Build and push CUDA 12 Docker image
-      - name: Build and push CUDA 12 image
+      # Build and push CUDA 12.1 Docker image
+      - name: Build and push CUDA 12.1 image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/ctrlaltdiffuse-cuda12:latest -f docker/Dockerfile.cuda12 .
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/ctrlaltdiffuse-cuda12:latest --build-arg CUDA_VERSION=12.1 -f docker/Dockerfile .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/ctrlaltdiffuse-cuda12:latest
 
-      # Build and push CUDA 11 Docker image
-      - name: Build and push CUDA 11 image
+      # Build and push CUDA 11.8 Docker image
+      - name: Build and push CUDA 11.8 image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/ctrlaltdiffuse-cuda11:latest -f docker/Dockerfile.cuda11 .
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/ctrlaltdiffuse-cuda11:latest --build-arg CUDA_VERSION=11.8 -f docker/Dockerfile .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/ctrlaltdiffuse-cuda11:latest
