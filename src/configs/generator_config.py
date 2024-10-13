@@ -7,5 +7,5 @@ from typing import Optional
 class GeneratorConfig:
     checkpoints: Optional[Path] = None
     """Path to the trained model"""
-    image_dimensions: tuple[int, int] = (256, 256)
-    """The dimension of the generated image"""
+    image_resolution: int = 256
+    """The width/height of the generated image"""
