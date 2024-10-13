@@ -41,7 +41,21 @@ pip install git+https://github.com/DarkTemplar91/CtrlAltDiffuse.git
 
 ## Docker
 
-### A. Building Docker Images with CUDA Support
+### A. Using Pre-built Docker Images in Production
+
+In production, you don't need to build the Docker images manually. Instead, you can pull the pre-built images from the GitHub Container Registry (GHCR) and run them with the following commands:
+
+For CUDA 12.1:
+```bash
+docker pull ghcr.io/darktemplar91/ctrlaltdiffuse-cuda12:latest
+docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ghcr.io/darktemplar91/ctrlaltdiffuse-cuda12:latest
+```
+For CUDA 11.8:
+```bash
+docker pull ghcr.io/darktemplar91/ctrlaltdiffuse-cuda11:latest
+docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ghcr.io/darktemplar91/ctrlaltdiffuse-cuda11:latest
+```
+### B. Building Docker Images with CUDA Support
 
 You can build Docker images with either CUDA 11.8 or CUDA 12.1 support. The default version is CUDA 11.8, but you can specify CUDA 12.1 by using a build argument.
 
