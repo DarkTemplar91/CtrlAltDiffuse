@@ -168,6 +168,18 @@ Path to the trained model
 The resolution of the generated image. Default: 256
 </details>
 
+# Data analysis
+We analyzed the input images in the ```data_analyse.ipynb``` Jupyter Notebook.\
+In the notebook, we did the following:
+
+- Used **PyTorch** to extract features from the selected datasets using a pre-trained VGG16 model.
+- Perform dimensionality reduction using **PCA**.
+- Apply **K-Means** clustering to group similar images.
+- Use **t-SNE** for visualization.
+- Create an interactive plot within the Jupyter Notebook where clicking on a point displays the corresponding image.
+- Create barchart for Mean RGB values
+- Create histogram for Color intensity
+
 # Administrative Informations
 
 ## Team members
@@ -180,3 +192,5 @@ The resolution of the generated image. Default: 256
 - https://arxiv.org/abs/2010.02502
 - https://keras.io/examples/generative/ddim/
 - https://github.com/ermongroup/ddim
+- https://scikit-learn.org/1.5/modules/generated/sklearn.manifold.TSNE.html
+- https://www.datacamp.com/tutorial/introduction-t-sne
