@@ -6,36 +6,32 @@ on:
       - docker_fix
 
 jobs:
-  build-and-publish-latest:
+  build-and-publish:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/docker_fix' # Running this job only for docker_fix branch
+    if: github.ref == 'refs/heads/docker_fix'
 
     permissions:
       contents: read
       packages: write
 
     steps:
-      - uses: actions/checkout@v2 # Checking out the repo
+      - uses: actions/checkout@v2
 
       - name: Set lowercase repository owner
         run: echo "LOWERCASE_OWNER=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
 
-      # Step 1: Build and Publish CUDA 12.1 Docker image
-      - name: Build and Publish CUDA 12.1 Docker image
-        uses: VaultVulp/gp-docker-action@1.0.1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }} # Provide GITHUB_TOKEN to login into GitHub Packages
-          image-name: ctrlaltdiffuse-cuda12 # Provide Docker image name
-          image-owner: ${{ env.LOWERCASE_OWNER }} # Use lowercase repository owner
-          dockerfile: ./docker/Dockerfile # Path to your Dockerfile
-          build-args: CUDA_VERSION=12.1 # CUDA 12.1 build argument
+      # Step 1: Log in to GitHub Container Registry (GHCR)
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
-      # Step 2: Build and Publish CUDA 11.8 Docker image
-      - name: Build and Publish CUDA 11.8 Docker image
-        uses: VaultVulp/gp-docker-action@1.0.1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }} # Provide GITHUB_TOKEN to login into GitHub Packages
-          image-name: ctrlaltdiffuse-cuda11 # Provide Docker image name
-          image-owner: ${{ env.LOWERCASE_OWNER }} # Use lowercase repository owner
-          dockerfile: ./docker/Dockerfile # Path to your Dockerfile
-          build-args: CUDA_VERSION=11.8 # CUDA 11.8 build argument
+      # Step 2: Build and push CUDA 12.1 Docker image
+      - name: Build and push CUDA 12.1 image
+        run: |
+          docker build --build-arg CUDA_VERSION=12.1 -t ghcr.io/${{ env.LOWERCASE_OWNER }}/ctrlaltdiffuse-cuda12:latest -f ./docker/Dockerfile .
+          docker push ghcr.io/${{ env.LOWERCASE_OWNER }}/ctrlaltdiffuse-cuda12:latest
+
+      # Step 3: Build and push CUDA 11.8 Docker image
+      - name: Build and push CUDA 11.8 image
+        run: |
+          docker build --build-arg CUDA_VERSION=11.8 -t ghcr.io/${{ env.LOWERCASE_OWNER }}/ctrlaltdiffuse-cuda11:latest -f ./docker/Dockerfile .
+          docker push ghcr.io/${{ env.LOWERCASE_OWNER }}/ctrlaltdiffuse-cuda11:latest
