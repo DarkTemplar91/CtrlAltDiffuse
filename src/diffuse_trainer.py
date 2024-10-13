@@ -5,7 +5,13 @@ from configs import TrainerConfig
 
 
 def main(config: TrainerConfig):
-    data_module = CelebsDataModule(config) if config.dataset_type == "celebs" else FlowersDataModule(config)
+    if config.dataset_type == "CelebA":
+        data_module = CelebsDataModule(config)
+    elif config.dataset_type == "Flowers102":
+        data_module = FlowersDataModule(config)
+    else:
+        raise ValueError(f"Dataset type '{config.dataset_type}' not supported")
+
     data_module.prepare_data()
     print(f"This script will train the model using the dataset '{config.dataset_type}'.")
 
