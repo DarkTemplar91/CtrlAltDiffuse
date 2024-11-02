@@ -13,6 +13,7 @@ def main(config: TrainerConfig):
         raise ValueError(f"Dataset type '{config.dataset_type}' not supported")
 
     data_module.prepare_data()
+    data_module.setup()
     print(f"This script will train the model using the dataset '{config.dataset_type}'.")
 
 

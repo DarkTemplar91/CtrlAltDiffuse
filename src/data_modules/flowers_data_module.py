@@ -6,6 +6,8 @@ from torchvision.datasets import Flowers102
 
 from configs import TrainerConfig
 
+from src.data_modules.subset_dataset import SubsetDataset
+
 
 class FlowersDataModule(pl.LightningDataModule):
     def __init__(self, config: TrainerConfig):
@@ -47,15 +49,11 @@ class FlowersDataModule(pl.LightningDataModule):
             full_dataset, [0.8, 0.1, 0.1]
         )
 
-        self.flowers_train.dataset.transform = self.transform_train
-        self.flowers_valid.dataset.transform = self.transform_val
-        self.flowers_test.dataset.transform = self.transform_val
-
     def train_dataloader(self):
-        return DataLoader(self.flowers_train, batch_size=self.batch_size, shuffle=True)
+        return DataLoader(SubsetDataset(self.flowers_train, self.transform_train), batch_size=self.batch_size, shuffle=True)
 
     def val_dataloader(self):
-        return DataLoader(self.flowers_valid, batch_size=self.batch_size)
+        return DataLoader(SubsetDataset(self.flowers_valid, self.transform_val), batch_size=self.batch_size)
 
     def test_dataloader(self):
-        return DataLoader(self.flowers_test, batch_size=self.batch_size)
+        return DataLoader(SubsetDataset(self.flowers_test, self.transform_val), batch_size=self.batch_size)
