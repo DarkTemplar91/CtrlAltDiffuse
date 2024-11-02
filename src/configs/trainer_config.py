@@ -19,6 +19,8 @@ class TrainerConfig:
     image_resolution: int = 256
     """Input image dimensions: the smaller edge of the image"""
     batch_size: int = 32
+    """Number of worker subprocesses"""
+    num_workers: int = 4
     """Number of samples per batch."""
     epochs: int = 10
     """Number of training epochs."""
