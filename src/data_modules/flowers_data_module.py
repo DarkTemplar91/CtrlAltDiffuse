@@ -18,6 +18,7 @@ class FlowersDataModule(pl.LightningDataModule):
 
         self.data_dir = config.dataset_path
         self.batch_size = config.batch_size
+        self.num_workers  = config.num_workers
         self.transform_train = transforms.Compose([
             transforms.RandomResizedCrop(config.image_resolution, antialias=True),
             transforms.RandomHorizontalFlip(),
@@ -50,10 +51,10 @@ class FlowersDataModule(pl.LightningDataModule):
         )
 
     def train_dataloader(self):
-        return DataLoader(SubsetDataset(self.flowers_train, self.transform_train), batch_size=self.batch_size, shuffle=True)
+        return DataLoader(SubsetDataset(self.flowers_train, self.transform_train), batch_size=self.batch_size, num_workers=self.num_workers, pin_memory=True, shuffle=True)
 
     def val_dataloader(self):
-        return DataLoader(SubsetDataset(self.flowers_valid, self.transform_val), batch_size=self.batch_size)
+        return DataLoader(SubsetDataset(self.flowers_valid, self.transform_val), batch_size=self.batch_size, num_workers=self.num_workers)
 
     def test_dataloader(self):
-        return DataLoader(SubsetDataset(self.flowers_test, self.transform_val), batch_size=self.batch_size)
+        return DataLoader(SubsetDataset(self.flowers_test, self.transform_val), batch_size=self.batch_size, num_workers=self.num_workers)

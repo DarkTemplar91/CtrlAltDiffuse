@@ -18,11 +18,11 @@ class TrainerConfig:
     """Path to store the checkpoint of the trained model;"""
     image_resolution: int = 256
     """Input image dimensions: the smaller edge of the image"""
-    batch_size: int = 32
+    batch_size: int = 5
     """Number of worker subprocesses"""
-    num_workers: int = 4
+    num_workers: int = 31
     """Number of samples per batch."""
-    epochs: int = 10
+    epochs: int = 150
     """Number of training epochs."""
     learning_rate: float = 0.001
     """Learning rate for the optimizer."""
