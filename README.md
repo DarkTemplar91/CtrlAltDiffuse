@@ -184,8 +184,7 @@ In the notebook, we did the following:
 
 1. **Download the Reference Model**  
    You can download the reference model from the following link:  
-   [Download Reference Model](https://bmeedu-my.sharepoint.com/:u:/g/personal/somodi_istvan_edu_bme_hu/EZko3h8MZEhEjZ3oVcmg2cYBv6-ZgrymSShTXZncQdLJlg?e=dGIekr).
-
+   [Download Reference Model](https://bmeedu-my.sharepoint.com/:u:/g/personal/somodi_istvan_edu_bme_hu/EZko3h8MZEhEjZ3oVcmg2cYBv6-ZgrymSShTXZncQdLJlg).
 2. **Benchmarking Notebook**  
    To evaluate the Reference model, we used the ```benchmark_FID_IS_KID.ipynb``` notebook. This notebook calculates three key metrics:
    - **FID (Frechet Inception Distance)**: Measures the distance between real and generated images in feature space. Lower FID scores indicate closer similarity and better-quality generated images.
