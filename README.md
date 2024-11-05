@@ -180,19 +180,19 @@ In the notebook, we did the following:
 - Create barchart for Mean RGB values
 - Create histogram for Color intensity
 
-# Model and Benchmarking
+# Reference Model and Benchmarking
 
 1. **Download the Reference Model**  
    You can download the reference model from the following link:  
    [Download Reference Model](https://bmeedu-my.sharepoint.com/:u:/g/personal/somodi_istvan_edu_bme_hu/EZko3h8MZEhEjZ3oVcmg2cYBv6-ZgrymSShTXZncQdLJlg?e=dGIekr).
 
 2. **Benchmarking Notebook**  
-   To evaluate the model, we used the ```benchmark_FID_IS_KID.ipynb``` notebook. This notebook calculates three key metrics:
+   To evaluate the Reference model, we used the ```benchmark_FID_IS_KID.ipynb``` notebook. This notebook calculates three key metrics:
    - **FID (Frechet Inception Distance)**: Measures the distance between real and generated images in feature space. Lower FID scores indicate closer similarity and better-quality generated images.
    - **IS (Inception Score)**: Evaluates image diversity and quality based on the likelihood of recognizable classes in generated images. Higher IS scores are better.
    - **KID (Kernel Inception Distance)**: Similar to FID but generally more robust for smaller sample sizes, providing another perspective on similarity between real and generated images.
 
-3. **Model Scores**  
+3. **Reference Model Scores**  
    The benchmark results for the reference model are as follows:
    - **FID Score**: 349.2197
    - **Inception Score**: Mean = 1.4570, Std = 0.2036
