@@ -18,7 +18,7 @@ class TrainerConfig:
     """Path to store the checkpoint of the trained model;"""
     image_resolution: int = 256
     """Input image dimensions: the smaller edge of the image"""
-    batch_size: int = 5
+    batch_size: int = 16
     """Number of worker subprocesses"""
     num_workers: int = 31
     """Number of samples per batch."""

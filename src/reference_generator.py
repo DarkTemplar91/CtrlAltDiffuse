@@ -8,7 +8,7 @@ from reference_diffusion_model import ReferenceDiffusionModel
 
 
 def main(
-        checkpoint: Path = Path("outputs/checkpoints/diffusion_model-psnr2-epoch=10-train_loss=1.10.ckpt"),
+        checkpoint: Path = Path("outputs/checkpoints/diffusion_model-epoch=05-train_loss=0.01.ckpt"),
         num_timesteps: int = 1000,
         num_samples: int = 1,
         seed: int = 0,
