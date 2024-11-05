@@ -200,6 +200,23 @@ In the notebook, we did the following:
 
 These scores provide a baseline for evaluating the model's quality in generating realistic and diverse images.
 
+**How to run the pipeline?**
+   - Use `reference_generator.py` to run the image generation pipeline. This script generates images based on a trained model checkpoint.
+   - Example command:
+     ```bash
+     python reference_generator.py
+     ```
+
+2. **How to train the models?**
+   - Training is handled by the `reference_train.py` script. Adjust hyperparameters such as batch size, learning rate, and epochs directly in the script or via command-line arguments.
+   - Example command:
+     ```bash
+     python reference_train.py 
+     ```
+
+3. **How to evaluate the models?**
+   - Evaluation metrics, including FID, IS, and KID, are available in the `benchmark_FID_IS_KID.ipynb` notebook. Run each cell to compute these metrics, which assess the quality and diversity of the generated images.
+
 # Administrative Informations
 
 ## Team members
