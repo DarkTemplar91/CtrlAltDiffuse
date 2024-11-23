@@ -1,28 +1,18 @@
-from torch import nn
+import torch
+import torch.nn as nn
 
-from src.diffusion_model.components.attention_block import AttentionBlock
 from src.diffusion_model.components.residual_block import ResidualBlock
 
 
 class DownBlock(nn.Module):
-    def __init__(self, in_channels, out_channels):
-        super().__init__()
-        self.res_block = ResidualBlock(in_channels, out_channels)
-        self.downsample = nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=2, padding=1)
+    def __init__(self, width: int, block_depth: int, input_width: int):
+        super(DownBlock, self).__init__()
+        self.res_blocks = nn.ModuleList(
+            [ResidualBlock(input_width if i == 0 else width, width) for i in range(block_depth)])
+        self.pool = nn.AvgPool2d(kernel_size=2)
 
-    def forward(self, x):
-        x = self.res_block(x)
-        skip = x
-        x = self.downsample(x)
-        return x, skip
-
-
-class AttnDownBlock(DownBlock):
-    def __init__(self, in_channels, out_channels):
-        super().__init__(in_channels, out_channels)
-        self.attn = AttentionBlock(out_channels)
-
-    def forward(self, x):
-        x, skip = super().forward(x)
-        x = self.attn(x)
-        return x, skip
+    def forward(self, x: torch.Tensor, skips: list) -> torch.Tensor:
+        for block in self.res_blocks:
+            x = block(x)
+            skips.append(x)
+        return self.pool(x)
