@@ -56,8 +56,7 @@ def main(config: TrainerConfig):
         filename="diffusion_model-psnr-{epoch:02d}-{train_loss:.2f}",
         save_top_k=3,
         monitor="val_psnr",
-        mode="max",
-        save_weights_only=True
+        mode="max"
     )
 
     early_stopping_callback = EarlyStopping(

@@ -11,6 +11,8 @@ class DiffusionModel(pl.LightningModule):
     def __init__(self, model, num_timesteps=1000, batch_size=32, lr=1e-4, ema=0.999, device=torch.device('cuda')):
         super(DiffusionModel, self).__init__()
 
+        self.save_hyperparameters()
+
         self.model = model
         self.num_timesteps = num_timesteps
         self.batch_size = batch_size
@@ -58,10 +60,8 @@ class DiffusionModel(pl.LightningModule):
         pred_noises, pred_images = self.scheduler.denoise(noisy_images, noise_rates, signal_rates, self.model)
 
         image_loss = F.mse_loss(pred_noises, noise)
-        psnr_value = self.psnr_metric(pred_noises, noise)
-        ssim_value = self.ssim_metric(pred_noises, noise)
-
-        self.update_ema()
+        psnr_value = self.psnr_metric(pred_images, images)
+        ssim_value = self.ssim_metric(pred_images, images)
 
         self.log("train_loss", image_loss, prog_bar=True)
         self.log("train_psnr", psnr_value, prog_bar=True)
@@ -80,8 +80,8 @@ class DiffusionModel(pl.LightningModule):
         pred_noises, pred_images = self.scheduler.denoise(noisy_images, noise_rates, signal_rates, self.ema_model)
 
         image_loss = F.mse_loss(pred_noises, noise)
-        psnr_value = self.psnr_metric(pred_noises, noise)
-        ssim_value = self.ssim_metric(pred_noises, noise)
+        psnr_value = self.psnr_metric(pred_images, images)
+        ssim_value = self.ssim_metric(pred_images, images)
 
         self.log("val_loss", image_loss, prog_bar=True)
         self.log("val_psnr", psnr_value, prog_bar=True)
@@ -89,5 +89,19 @@ class DiffusionModel(pl.LightningModule):
 
         return image_loss
 
+    def on_train_batch_end(self, outputs, batch, batch_idx, dataloader_idx=0):
+        self.update_ema()
+
     def configure_optimizers(self):
         return torch.optim.Adam(self.model.parameters(), lr=self.lr)
+
+    def state_dict(self, **kwargs):
+        state = super().state_dict()
+        state["ema_model_state"] = self.ema_model.state_dict()
+        return state
+
+    def load_state_dict(self, state_dict, **kwargs):
+        ema_state = state_dict.pop("ema_model_state", None)
+        super().load_state_dict(state_dict)
+        if ema_state:
+            self.ema_model.load_state_dict(ema_state)

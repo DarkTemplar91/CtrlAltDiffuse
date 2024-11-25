@@ -6,7 +6,6 @@ import torch
 import matplotlib.pyplot as plt
 
 from configs import GeneratorConfig
-from diffusion_model.components.unet import UNet
 from diffusion_model.diffusion_model import DiffusionModel
 
 
@@ -20,40 +19,26 @@ def main(config: GeneratorConfig):
     print("Initializing U-Net model...")
 
     device = torch.device("cuda")
-    unet_model = UNet(
-        input_channels=3,
-        output_channels=3,
-        widths=[32, 64, 96, 128],
-        block_depth=2,
-        embedding_min_frequency=1e-2,
-        embedding_max_frequency=1e4,
-        embedding_dims=32,
-        device=device
-    )
 
-    diffusion_model = DiffusionModel(
-        model=unet_model,
-        device=device,
-    )
-
-    if config.checkpoints:
-        load_model_checkpoint(diffusion_model, config.checkpoints)
-
+    diffusion_model = DiffusionModel.load_from_checkpoint(config.checkpoints)
     diffusion_model.eval()
     diffusion_model.to(device)
 
     print(f"Generating a random image at resolution {config.image_resolution}x{config.image_resolution}...")
     num_images = 8
-    generated_images = diffusion_model.generate(
-        num_images=num_images,
-        diffusion_steps=1000,
-        resolution=config.image_resolution
-    )
+    with torch.inference_mode():
+        generated_images = diffusion_model.generate(
+            num_images=num_images,
+            diffusion_steps=1000,
+            resolution=config.image_resolution
+        )
 
     cols = 4
     rows = math.ceil(num_images / cols)
     fig, axes = plt.subplots(rows, cols, figsize=(8 * cols, 8 * rows))
     axes = axes.flatten()
+    generated_images = (generated_images * 0.5) + 0.5
+    generated_images = torch.clamp(generated_images, 0, 1)
     for i in range(num_images):
         ax = axes[i]
         generated_image = generated_images[i].cpu().detach().numpy().transpose(1, 2, 0)
