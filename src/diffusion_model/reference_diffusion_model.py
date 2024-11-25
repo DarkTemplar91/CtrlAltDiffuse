@@ -45,6 +45,8 @@ class ReferenceDiffusionModel(pl.LightningModule):
         ssim = self.ssim_metric(predicted_noise, noise)
         self.log("train_ssim", ssim, prog_bar=True)
 
+        return loss
+
     def validation_step(self, batch, batch_idx):
         images, labels = batch
         noise = torch.randn_like(images)

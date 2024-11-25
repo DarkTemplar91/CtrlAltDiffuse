@@ -1,7 +1,15 @@
+from pathlib import Path
+
+import torch
 import tyro.extras
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
+import pytorch_lightning as pl
 
 from data_modules import CelebsDataModule, FlowersDataModule
 from configs import TrainerConfig
+from src.diffuse_generator import load_model_checkpoint
+from src.diffusion_model.components.unet import UNet
+from src.diffusion_model.diffusion_model import DiffusionModel
 
 
 def main(config: TrainerConfig):
@@ -15,6 +23,58 @@ def main(config: TrainerConfig):
     data_module.prepare_data()
     data_module.setup()
     print(f"This script will train the model using the dataset '{config.dataset_type}'.")
+
+    # Set up checkpoint directory
+    checkpoint_dir = Path(config.output) / "checkpoints"
+    checkpoint_dir.mkdir(parents=True, exist_ok=True)
+
+    device = torch.device("cuda")
+    unet_model = UNet(
+        input_channels=3,
+        output_channels=3,
+        widths=[32, 64, 96, 128],
+        block_depth=2,
+        embedding_min_frequency=1e-2,
+        embedding_max_frequency=1e4,
+        embedding_dims=32,
+        device=device
+    )
+
+    diffusion_model = DiffusionModel(
+        model=unet_model,
+        device=device,
+    )
+
+    if config.checkpoints:
+        load_model_checkpoint(diffusion_model, config.checkpoints)
+
+    diffusion_model.train()
+    diffusion_model.to(device)
+
+    checkpoint_callback = ModelCheckpoint(
+        dirpath=checkpoint_dir,
+        filename="diffusion_model-psnr-{epoch:02d}-{train_loss:.2f}",
+        save_top_k=3,
+        monitor="val_psnr",
+        mode="max",
+        save_weights_only=True
+    )
+
+    early_stopping_callback = EarlyStopping(
+        monitor="val_psnr",
+        patience=15,
+        mode="max",
+        verbose=True
+    )
+
+    trainer = pl.Trainer(
+        max_epochs=config.epochs,
+        precision="bf16-mixed",
+        default_root_dir=checkpoint_dir,
+        callbacks=[checkpoint_callback, early_stopping_callback],
+    )
+
+    trainer.fit(diffusion_model, datamodule=data_module)
 
 
 def entrypoint():

@@ -48,7 +48,7 @@ class DiffusionModel(pl.LightningModule):
         return generated_images
 
     def training_step(self, batch, batch_idx):
-        images = batch["images"]
+        images, _ = batch
         noise = torch.randn_like(images)
 
         diffusion_times = torch.rand((images.size(0), 1, 1, 1), device=images.device)
@@ -56,19 +56,22 @@ class DiffusionModel(pl.LightningModule):
         noisy_images = signal_rates * images + noise_rates * noise
 
         pred_noises, pred_images = self.scheduler.denoise(noisy_images, noise_rates, signal_rates, self.model)
+        pred_images = torch.clamp(pred_images, min=-1.0, max=1.0)
 
-        image_loss = F.mse_loss(pred_images, images)
+        image_loss = F.mse_loss(pred_noises, noisy_images)
         psnr_value = self.psnr_metric(pred_images, images)
         ssim_value = self.ssim_metric(pred_images, images)
 
         self.update_ema()
 
-        self.log("train_image_loss", image_loss, prog_bar=True)
+        self.log("train_loss", image_loss, prog_bar=True)
         self.log("train_psnr", psnr_value, prog_bar=True)
         self.log("train_ssim", ssim_value, prog_bar=True)
 
+        return image_loss
+
     def validation_step(self, batch, batch_idx):
-        images = batch["images"]
+        images, _ = batch
         noise = torch.randn_like(images)
 
         diffusion_times = torch.rand((images.size(0), 1, 1, 1), device=images.device)
@@ -76,14 +79,17 @@ class DiffusionModel(pl.LightningModule):
         noisy_images = signal_rates * images + noise_rates * noise
 
         pred_noises, pred_images = self.scheduler.denoise(noisy_images, noise_rates, signal_rates, self.ema_model)
+        pred_images = torch.clamp(pred_images, min=-1.0, max=1.0)
 
-        image_loss = F.mse_loss(pred_images, images)
+        image_loss = F.mse_loss(pred_noises, noisy_images)
         psnr_value = self.psnr_metric(pred_images, images)
         ssim_value = self.ssim_metric(pred_images, images)
 
         self.log("val_loss", image_loss, prog_bar=True)
         self.log("val_psnr", psnr_value, prog_bar=True)
         self.log("val_ssim", ssim_value, prog_bar=True)
+
+        return image_loss
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.model.parameters(), lr=self.lr)
