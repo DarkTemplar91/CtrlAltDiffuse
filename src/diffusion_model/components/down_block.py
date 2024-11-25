@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from src.diffusion_model.components.residual_block import ResidualBlock
+from .residual_block import ResidualBlock
 
 
 class DownBlock(nn.Module):

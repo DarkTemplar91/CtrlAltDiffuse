@@ -3,8 +3,8 @@ import torch
 import torch.nn.functional as F
 import torchmetrics
 
-from src.diffusion_model.components.unet import UNet
-from src.diffusion_model.schedulers.ddim_scheduler import DDIMScheduler
+from .components.unet import UNet
+from .schedulers.ddim_scheduler import DDIMScheduler
 
 
 class DiffusionModel(pl.LightningModule):

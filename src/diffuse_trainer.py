@@ -7,9 +7,9 @@ import pytorch_lightning as pl
 
 from data_modules import CelebsDataModule, FlowersDataModule
 from configs import TrainerConfig
-from src.diffuse_generator import load_model_checkpoint
-from src.diffusion_model.components.unet import UNet
-from src.diffusion_model.diffusion_model import DiffusionModel
+from diffuse_generator import load_model_checkpoint
+from diffusion_model.components.unet import UNet
+from diffusion_model.diffusion_model import DiffusionModel
 
 
 def main(config: TrainerConfig):

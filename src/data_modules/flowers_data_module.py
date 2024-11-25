@@ -6,7 +6,7 @@ from torchvision.datasets import Flowers102
 
 from configs import TrainerConfig
 
-from src.data_modules.subset_dataset import SubsetDataset
+from .subset_dataset import SubsetDataset
 
 
 class FlowersDataModule(pl.LightningDataModule):

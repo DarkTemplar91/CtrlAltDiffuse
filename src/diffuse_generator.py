@@ -6,8 +6,8 @@ import torch
 import matplotlib.pyplot as plt
 
 from configs import GeneratorConfig
-from src.diffusion_model.components.unet import UNet
-from src.diffusion_model.diffusion_model import DiffusionModel
+from diffusion_model.components.unet import UNet
+from diffusion_model.diffusion_model import DiffusionModel
 
 
 def load_model_checkpoint(model, checkpoint_path: Path):

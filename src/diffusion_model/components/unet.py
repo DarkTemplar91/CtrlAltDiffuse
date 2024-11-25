@@ -2,10 +2,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from src.diffusion_model.components.down_block import DownBlock
-from src.diffusion_model.components.residual_block import ResidualBlock
-from src.diffusion_model.components.sinusodial_embeding import SinusoidalEmbedding
-from src.diffusion_model.components.up_block import UpBlock
+from .down_block import DownBlock
+from .residual_block import ResidualBlock
+from .sinusodial_embeding import SinusoidalEmbedding
+from .up_block import UpBlock
 
 
 class UNet(nn.Module):
