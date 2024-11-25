@@ -1,112 +1,89 @@
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
+import torchmetrics
 
-
-def _linear_beta_schedule(num_timesteps, beta_start=0.0001, beta_end=0.02):
-    return torch.linspace(beta_start, beta_end, num_timesteps)
+from src.diffusion_model.components.unet import UNet
+from src.diffusion_model.schedulers.ddim_scheduler import DDIMScheduler
 
 
 class DiffusionModel(pl.LightningModule):
-    def __init__(self, model, num_timesteps=1000, batch_size=32, lr=1e-4):
+    def __init__(self, model, num_timesteps=1000, batch_size=32, lr=1e-4, ema=0.999, device=torch.device('cuda')):
         super(DiffusionModel, self).__init__()
+
         self.model = model
         self.num_timesteps = num_timesteps
         self.batch_size = batch_size
         self.lr = lr
+        self.scheduler = DDIMScheduler(num_timesteps=num_timesteps, device=device)  # TODO: pass other arguments
 
-        # Noise schedule (betas and precomputed coefficients)
-        self.betas = _linear_beta_schedule(num_timesteps)
-        self.alphas = 1.0 - self.betas
-        self.alphas_cumprod = torch.cumprod(torch.tensor(self.alphas), dim=0)
-        self.sqrt_alphas_cumprod = torch.sqrt(self.alphas_cumprod)
-        self.sqrt_one_minus_alphas_cumprod = torch.sqrt(1.0 - self.alphas_cumprod)
+        # EMA setup
+        self.ema_model = UNet(
+            input_channels=self.model.input_channels,
+            output_channels=self.model.output_channels,
+            widths=self.model.widths,
+            block_depth=self.model.block_depth,
+            embedding_min_frequency=self.model.embedding_min_frequency,
+            embedding_max_frequency=self.model.embedding_max_frequency,
+            embedding_dims=self.model.embedding_dims,
+            device=device
+        )
+        self.ema_model.load_state_dict(self.model.state_dict())
+        self.ema = ema
 
-        # Metrics
-        #self.fid_metric = FrechetInceptionDistance(feature=64, normalize=True)
-        #self.is_metric = InceptionScore(normalize=True)
-        #self.kid_metric = KernelInceptionDistance(subset_size=50, normalize=True)
+        self.psnr_metric = torchmetrics.image.PeakSignalNoiseRatio()
+        self.ssim_metric = torchmetrics.image.StructuralSimilarityIndexMeasure(data_range=1.0)
 
-    def forward_diffusion(self, x_0, t):
-        batch_size = x_0.shape[0]
-        t = t.to(self.device)
-        noise = torch.randn_like(x_0).to(self.device)
+    def update_ema(self):
+        with torch.no_grad():
+            for ema_param, param in zip(self.ema_model.parameters(), self.model.parameters()):
+                ema_param.data = self.ema * ema_param.data + (1 - self.ema) * param.data
 
-        alpha_t = self.sqrt_alphas_cumprod[t].view(batch_size, 1, 1, 1).to(self.device)
-        alpha_t_bar = self.sqrt_one_minus_alphas_cumprod[t].view(batch_size, 1, 1, 1).to(self.device)
+    def forward(self, x, t):
+        return self.model(x, t)
 
-        x_t = alpha_t * x_0 + alpha_t_bar * noise
-        return x_t, noise
-
-    def sample_images(self, num_samples, resolution):
-        shape = (num_samples, 3, resolution, resolution)
-        x_t = torch.randn(shape).to(self.device)
-
-        for t in reversed(range(self.num_timesteps)):
-            t_tensor = torch.full((num_samples,), t, device=self.device, dtype=torch.long)
-
-            pred_noise = self.model(x_t, t_tensor)
-
-            alpha_t = self.alphas_cumprod[t]
-            sqrt_alpha_t = torch.sqrt(alpha_t)
-            sqrt_one_minus_alpha_t = torch.sqrt(1.0 - alpha_t)
-
-            x_0_pred = (x_t - sqrt_one_minus_alpha_t * pred_noise) / sqrt_alpha_t
-
-            if t > 0:
-                alpha_t_prev = self.alphas_cumprod[t - 1]
-                beta_t = self.betas[t]
-                noise = torch.randn_like(x_t)
-                x_t = (
-                    torch.sqrt(alpha_t_prev) * x_0_pred +
-                    torch.sqrt(1 - alpha_t_prev) * noise
-                )
-            else:
-                x_t = x_0_pred
-
-        return x_t
+    def generate(self, num_images, diffusion_steps, resolution):
+        initial_noise = torch.randn((num_images, 3, resolution, resolution), device=self.device)
+        generated_images = self.scheduler.reverse_diffusion(initial_noise, diffusion_steps, self.ema_model)
+        return generated_images
 
     def training_step(self, batch, batch_idx):
-        x_0 = batch
-        t = torch.randint(0, self.num_timesteps, (self.batch_size,), device=self.device)
-        x_t, noise = self.forward_diffusion(x_0, t)
+        images = batch["images"]
+        noise = torch.randn_like(images)
 
-        pred_noise = self.model(x_t, t)
+        diffusion_times = torch.rand((images.size(0), 1, 1, 1), device=images.device)
+        noise_rates, signal_rates = self.scheduler.diffusion_schedule(diffusion_times)
+        noisy_images = signal_rates * images + noise_rates * noise
 
-        loss = F.mse_loss(pred_noise, noise)
-        self.log('train_loss', loss)
-        return loss
+        pred_noises, pred_images = self.scheduler.denoise(noisy_images, noise_rates, signal_rates, self.model)
+
+        image_loss = F.mse_loss(pred_images, images)
+        psnr_value = self.psnr_metric(pred_images, images)
+        ssim_value = self.ssim_metric(pred_images, images)
+
+        self.update_ema()
+
+        self.log("train_image_loss", image_loss, prog_bar=True)
+        self.log("train_psnr", psnr_value, prog_bar=True)
+        self.log("train_ssim", ssim_value, prog_bar=True)
 
     def validation_step(self, batch, batch_idx):
-        x_0 = batch
-        t = torch.randint(0, self.num_timesteps, (self.batch_size,), device=self.device)
-        x_t, noise = self.forward_diffusion(x_0, t)
+        images = batch["images"]
+        noise = torch.randn_like(images)
 
-        pred_noise = self.model(x_t, t)
-        val_loss = F.mse_loss(pred_noise, noise)
+        diffusion_times = torch.rand((images.size(0), 1, 1, 1), device=images.device)
+        noise_rates, signal_rates = self.scheduler.diffusion_schedule(diffusion_times)
+        noisy_images = signal_rates * images + noise_rates * noise
 
-        self.log('val_loss', val_loss)
+        pred_noises, pred_images = self.scheduler.denoise(noisy_images, noise_rates, signal_rates, self.ema_model)
 
-    def test_step(self, batch, batch_idx):
-        generated_images = self.sample_images(self.batch_size)
-        fid_score, is_score, kid_score = self.calculate_metrics(generated_images)
-        self.log('fid_score', fid_score)
-        self.log('inception_score', is_score)
-        self.log('kid_score', kid_score)
+        image_loss = F.mse_loss(pred_images, images)
+        psnr_value = self.psnr_metric(pred_images, images)
+        ssim_value = self.ssim_metric(pred_images, images)
+
+        self.log("val_loss", image_loss, prog_bar=True)
+        self.log("val_psnr", psnr_value, prog_bar=True)
+        self.log("val_ssim", ssim_value, prog_bar=True)
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
-        return optimizer
-
-    def calculate_metrics(self, generated_images):
-        return None, None, None
-        """self.fid_metric.update(generated_images, real=False)
-        fid_score = self.fid_metric.compute()
-
-        self.is_metric.update(generated_images)
-        is_score = self.is_metric.compute()
-
-        self.kid_metric.update(generated_images, real=False)
-        kid_score = self.kid_metric.compute()
-
-        return fid_score, is_score, kid_score"""
+        return torch.optim.Adam(self.model.parameters(), lr=self.lr)

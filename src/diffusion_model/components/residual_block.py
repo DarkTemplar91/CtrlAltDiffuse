@@ -12,7 +12,7 @@ class ResidualBlock(nn.Module):
             self.residual_conv = nn.Conv2d(input_width, width, kernel_size=1)
 
         self.bn = nn.BatchNorm2d(input_width, affine=False)
-        self.conv1 = nn.Conv2d(width, width, kernel_size=3, padding=1)
+        self.conv1 = nn.Conv2d(input_width, width, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(width, width, kernel_size=3, padding=1)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

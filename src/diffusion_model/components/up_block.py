@@ -9,7 +9,8 @@ class UpBlock(nn.Module):
         super(UpBlock, self).__init__()
         self.up = nn.Upsample(scale_factor=2, mode="bilinear", align_corners=True)
         self.res_blocks = nn.ModuleList(
-            [ResidualBlock(input_width if i == 0 else width, width) for i in range(block_depth)])
+            [ResidualBlock(input_width + width, width) if i == 0 else ResidualBlock(width * 2, width)
+             for i in range(block_depth)])
 
     def forward(self, x: torch.Tensor, skips: list) -> torch.Tensor:
         x = self.up(x)

@@ -4,10 +4,12 @@ import math
 
 
 class SinusoidalEmbedding(nn.Module):
-    def __init__(self, embedding_min_frequency: float, embedding_max_frequency: float, embedding_dims: int):
+    def __init__(self, embedding_min_frequency: float, embedding_max_frequency: float, embedding_dims: int,
+                 device=torch.device('cuda:0')):
         super(SinusoidalEmbedding, self).__init__()
         assert embedding_dims % 2 == 0, "embedding_dims must be an even number"
 
+        self.device = device
         self.embedding_min_frequency = embedding_min_frequency
         self.embedding_max_frequency = embedding_max_frequency
         self.embedding_dims = embedding_dims
@@ -18,7 +20,7 @@ class SinusoidalEmbedding(nn.Module):
                 math.log(self.embedding_max_frequency),
                 embedding_dims // 2
             )
-        )
+        ).to(self.device)
         self.angular_speeds = 2.0 * math.pi * self.frequencies
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

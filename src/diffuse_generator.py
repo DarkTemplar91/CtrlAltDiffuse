@@ -1,3 +1,6 @@
+import math
+from pathlib import Path
+
 import tyro
 import torch
 import matplotlib.pyplot as plt
@@ -7,25 +10,64 @@ from src.diffusion_model.components.unet import UNet
 from src.diffusion_model.diffusion_model import DiffusionModel
 
 
-def main(config: GeneratorConfig):
-    print("This script will generate an image")
+def load_model_checkpoint(model, checkpoint_path: Path):
+    checkpoint = torch.load(checkpoint_path, map_location=torch.device('cpu'))
+    model.load_state_dict(checkpoint["state_dict"])
+    print(f"Loaded model checkpoint from {checkpoint_path}")
 
-    model = UNet(
-        block_out_channels=(128, 128, 256, 256, 512, 512),
-        down_block_types=("DownBlock2D", "DownBlock2D", "DownBlock2D", "DownBlock2D", "AttnDownBlock2D", "DownBlock2D"),
-        up_block_types=("UpBlock2D", "AttnUpBlock2D", "UpBlock2D", "UpBlock2D", "UpBlock2D", "UpBlock2D"),
-        input_channels=3, output_channels=3, embedding_dim=32
+
+def main(config: GeneratorConfig):
+    print("Initializing U-Net model...")
+
+    device = torch.device("cuda")
+    unet_model = UNet(
+        input_channels=3,
+        output_channels=3,
+        widths=[32, 64, 96, 128],
+        block_depth=2,
+        embedding_min_frequency=1e-2,
+        embedding_max_frequency=1e4,
+        embedding_dims=32,
+        device=device
     )
 
-    diffusion_model = DiffusionModel(model, num_timesteps=1000, batch_size=1, lr=1e-4)
+    diffusion_model = DiffusionModel(
+        model=unet_model,
+        device=device,
+    )
 
-    generated_image = diffusion_model.sample_images(1, 128)
+    if config.checkpoints:
+        load_model_checkpoint(diffusion_model, config.checkpoints)
 
-    # Plot generated image
-    generated_image = generated_image.squeeze().permute(1, 2, 0).cpu().detach().numpy()
-    plt.imshow((generated_image + 1) / 2)
-    plt.axis('off')
+    diffusion_model.eval()
+    diffusion_model.to(device)
+
+    print(f"Generating a random image at resolution {config.image_resolution}x{config.image_resolution}...")
+    num_images = 8
+    generated_images = diffusion_model.generate(
+        num_images=num_images,
+        diffusion_steps=1000,
+        resolution=config.image_resolution
+    )
+
+    cols = 4
+    rows = math.ceil(num_images / cols)
+    fig, axes = plt.subplots(rows, cols, figsize=(8 * cols, 8 * rows))
+    axes = axes.flatten()
+    for i in range(num_images):
+        ax = axes[i]
+        generated_image = generated_images[i].cpu().detach().numpy().transpose(1, 2, 0)
+
+        ax.imshow(generated_image)
+        ax.axis("off")
+        ax.set_title(f"Generated Image {i + 1}")
+
+    for i in range(num_images, len(axes)):
+        axes[i].axis("off")
+
     plt.show()
+
+    print("Image generation completed.")
 
 
 def entrypoint():
