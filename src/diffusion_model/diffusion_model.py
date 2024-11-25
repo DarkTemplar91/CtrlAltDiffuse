@@ -56,11 +56,10 @@ class DiffusionModel(pl.LightningModule):
         noisy_images = signal_rates * images + noise_rates * noise
 
         pred_noises, pred_images = self.scheduler.denoise(noisy_images, noise_rates, signal_rates, self.model)
-        pred_images = torch.clamp(pred_images, min=-1.0, max=1.0)
 
-        image_loss = F.mse_loss(pred_noises, noisy_images)
-        psnr_value = self.psnr_metric(pred_images, images)
-        ssim_value = self.ssim_metric(pred_images, images)
+        image_loss = F.mse_loss(pred_noises, noise)
+        psnr_value = self.psnr_metric(pred_noises, noise)
+        ssim_value = self.ssim_metric(pred_noises, noise)
 
         self.update_ema()
 
@@ -79,11 +78,10 @@ class DiffusionModel(pl.LightningModule):
         noisy_images = signal_rates * images + noise_rates * noise
 
         pred_noises, pred_images = self.scheduler.denoise(noisy_images, noise_rates, signal_rates, self.ema_model)
-        pred_images = torch.clamp(pred_images, min=-1.0, max=1.0)
 
-        image_loss = F.mse_loss(pred_noises, noisy_images)
-        psnr_value = self.psnr_metric(pred_images, images)
-        ssim_value = self.ssim_metric(pred_images, images)
+        image_loss = F.mse_loss(pred_noises, noise)
+        psnr_value = self.psnr_metric(pred_noises, noise)
+        ssim_value = self.ssim_metric(pred_noises, noise)
 
         self.log("val_loss", image_loss, prog_bar=True)
         self.log("val_psnr", psnr_value, prog_bar=True)

@@ -62,6 +62,7 @@ class UNet(nn.Module):
 
         # Final convolution
         self.final_conv = nn.Conv2d(current_width, output_channels, kernel_size=1, bias=False)
+        nn.init.zeros_(self.final_conv.weight)
 
     def forward(self, images: torch.Tensor, noise_variances: torch.Tensor) -> torch.Tensor:
         skips = []
