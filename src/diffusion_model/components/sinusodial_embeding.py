@@ -21,7 +21,7 @@ class SinusoidalEmbedding(nn.Module):
                 embedding_dims // 2
             )
         ).to(self.device)
-        self.angular_speeds = 2.0 * math.pi * self.frequencies
+        self.angular_speeds = 2.0 * torch.pi * self.frequencies
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = x.to(torch.float32)

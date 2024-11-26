@@ -5,10 +5,12 @@ import torchmetrics
 
 from .components.unet import UNet
 from .schedulers.ddim_scheduler import DDIMScheduler
+from configs.trainer_config import OptimizerType
 
 
 class DiffusionModel(pl.LightningModule):
-    def __init__(self, model, num_timesteps=1000, batch_size=32, lr=1e-4, ema=0.999, device=torch.device('cuda')):
+    def __init__(self, model, optim_type: OptimizerType, num_timesteps=1000, batch_size=32, lr=1e-4, ema=0.95,
+                 device=torch.device('cuda')):
         super(DiffusionModel, self).__init__()
 
         self.save_hyperparameters()
@@ -18,6 +20,7 @@ class DiffusionModel(pl.LightningModule):
         self.batch_size = batch_size
         self.lr = lr
         self.scheduler = DDIMScheduler(num_timesteps=num_timesteps, device=device)  # TODO: pass other arguments
+        self.optim_type = optim_type
 
         # EMA setup
         self.ema_model = UNet(
@@ -52,6 +55,7 @@ class DiffusionModel(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         images, _ = batch
         noise = torch.randn_like(images)
+        noise = noise * 0.5 + 0.5  # Adjust for mean 0.5 and std 0.5
 
         diffusion_times = torch.rand((images.size(0), 1, 1, 1), device=images.device)
         noise_rates, signal_rates = self.scheduler.diffusion_schedule(diffusion_times)
@@ -59,19 +63,20 @@ class DiffusionModel(pl.LightningModule):
 
         pred_noises, pred_images = self.scheduler.denoise(noisy_images, noise_rates, signal_rates, self.model)
 
-        image_loss = F.mse_loss(pred_noises, noise)
+        loss = F.mse_loss(pred_noises, noise)
         psnr_value = self.psnr_metric(pred_images, images)
         ssim_value = self.ssim_metric(pred_images, images)
 
-        self.log("train_loss", image_loss, prog_bar=True)
+        self.log("train_loss", loss, prog_bar=True)
         self.log("train_psnr", psnr_value, prog_bar=True)
         self.log("train_ssim", ssim_value, prog_bar=True)
 
-        return image_loss
+        return loss
 
     def validation_step(self, batch, batch_idx):
         images, _ = batch
         noise = torch.randn_like(images)
+        noise = noise * 0.5 + 0.5  # Adjust for mean 0.5 and std 0.5
 
         diffusion_times = torch.rand((images.size(0), 1, 1, 1), device=images.device)
         noise_rates, signal_rates = self.scheduler.diffusion_schedule(diffusion_times)
@@ -79,21 +84,29 @@ class DiffusionModel(pl.LightningModule):
 
         pred_noises, pred_images = self.scheduler.denoise(noisy_images, noise_rates, signal_rates, self.ema_model)
 
-        image_loss = F.mse_loss(pred_noises, noise)
+        loss = F.mse_loss(pred_noises, noise)
         psnr_value = self.psnr_metric(pred_images, images)
         ssim_value = self.ssim_metric(pred_images, images)
 
-        self.log("val_loss", image_loss, prog_bar=True)
+        self.log("val_loss", loss, prog_bar=True)
         self.log("val_psnr", psnr_value, prog_bar=True)
         self.log("val_ssim", ssim_value, prog_bar=True)
 
-        return image_loss
+        return loss
 
     def on_train_batch_end(self, outputs, batch, batch_idx, dataloader_idx=0):
         self.update_ema()
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.model.parameters(), lr=self.lr)
+        match self.optim_type:
+            case "SGD":
+                return torch.optim.SGD(self.model.parameters(), lr=self.lr)
+            case "Adam":
+                return torch.optim.Adam(self.model.parameters(), lr=self.lr)
+            case "AdamW":
+                return torch.optim.AdamW(self.model.parameters(), lr=self.lr)
+            case _:
+                raise ValueError
 
     def state_dict(self, **kwargs):
         state = super().state_dict()
@@ -105,3 +118,4 @@ class DiffusionModel(pl.LightningModule):
         super().load_state_dict(state_dict)
         if ema_state:
             self.ema_model.load_state_dict(ema_state)
+            self.ema_model.to(self.device)

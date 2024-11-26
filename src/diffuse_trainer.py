@@ -7,7 +7,6 @@ import pytorch_lightning as pl
 
 from data_modules import CelebsDataModule, FlowersDataModule
 from configs import TrainerConfig
-from diffuse_generator import load_model_checkpoint
 from diffusion_model.components.unet import UNet
 from diffusion_model.diffusion_model import DiffusionModel
 
@@ -29,24 +28,26 @@ def main(config: TrainerConfig):
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
     device = torch.device("cuda")
-    unet_model = UNet(
-        input_channels=3,
-        output_channels=3,
-        widths=[32, 64, 96, 128],
-        block_depth=2,
-        embedding_min_frequency=1e-2,
-        embedding_max_frequency=1e4,
-        embedding_dims=32,
-        device=device
-    )
-
-    diffusion_model = DiffusionModel(
-        model=unet_model,
-        device=device,
-    )
 
     if config.checkpoints:
-        load_model_checkpoint(diffusion_model, config.checkpoints)
+        diffusion_model = DiffusionModel.load_from_checkpoint(config.checkpoints)
+    else:
+        unet_model = UNet(
+            input_channels=3,
+            output_channels=3,
+            widths=[32, 64, 96, 128],
+            block_depth=2,
+            embedding_min_frequency=1e-2,
+            embedding_max_frequency=1e4,
+            embedding_dims=32,
+            device=device
+        )
+
+        diffusion_model = DiffusionModel(
+            model=unet_model,
+            optim_type=config.optimizer,
+            device=device,
+        )
 
     diffusion_model.train()
     diffusion_model.to(device)
@@ -61,7 +62,7 @@ def main(config: TrainerConfig):
 
     early_stopping_callback = EarlyStopping(
         monitor="val_psnr",
-        patience=15,
+        patience=10,
         mode="max",
         verbose=True
     )
