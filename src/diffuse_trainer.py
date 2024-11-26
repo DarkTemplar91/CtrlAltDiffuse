@@ -60,18 +60,18 @@ def main(config: TrainerConfig):
         mode="max"
     )
 
-    early_stopping_callback = EarlyStopping(
+    """early_stopping_callback = EarlyStopping(
         monitor="val_loss",
         patience=10,
         mode="max",
         verbose=True
-    )
+    )"""
 
     trainer = pl.Trainer(
         max_epochs=config.epochs,
         precision="bf16-mixed",
         default_root_dir=checkpoint_dir,
-        callbacks=[checkpoint_callback, early_stopping_callback],
+        callbacks=[checkpoint_callback],
     )
 
     trainer.fit(diffusion_model, datamodule=data_module)
