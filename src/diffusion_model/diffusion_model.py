@@ -82,7 +82,7 @@ class DiffusionModel(pl.LightningModule):
         noise_rates, signal_rates = self.scheduler.diffusion_schedule(diffusion_times)
         noisy_images = signal_rates * images + noise_rates * noise
 
-        pred_noises, pred_images = self.scheduler.denoise(noisy_images, noise_rates, signal_rates, self.ema_model)
+        pred_noises, pred_images = self.scheduler.denoise(noisy_images, noise_rates, signal_rates, self.model)
 
         loss = F.mse_loss(pred_noises, noise)
         psnr_value = self.psnr_metric(pred_images, images)
