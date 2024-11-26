@@ -56,12 +56,12 @@ def main(config: TrainerConfig):
         dirpath=checkpoint_dir,
         filename="diffusion_model-psnr-{epoch:02d}-{train_loss:.2f}",
         save_top_k=3,
-        monitor="val_psnr",
+        monitor="val_loss",
         mode="max"
     )
 
     early_stopping_callback = EarlyStopping(
-        monitor="val_psnr",
+        monitor="val_loss",
         patience=10,
         mode="max",
         verbose=True
