@@ -47,6 +47,7 @@ def main(config: TrainerConfig):
             model=unet_model,
             optim_type=config.optimizer,
             device=device,
+            ema=0.7
         )
 
     diffusion_model.train()
