@@ -55,7 +55,6 @@ class DiffusionModel(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         images, _ = batch
         noise = torch.randn_like(images)
-        noise = noise * 0.5 + 0.5  # Adjust for mean 0.5 and std 0.5
 
         diffusion_times = torch.rand((images.size(0), 1, 1, 1), device=images.device)
         noise_rates, signal_rates = self.scheduler.diffusion_schedule(diffusion_times)
@@ -76,7 +75,6 @@ class DiffusionModel(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         images, _ = batch
         noise = torch.randn_like(images)
-        noise = noise * 0.5 + 0.5  # Adjust for mean 0.5 and std 0.5
 
         diffusion_times = torch.rand((images.size(0), 1, 1, 1), device=images.device)
         noise_rates, signal_rates = self.scheduler.diffusion_schedule(diffusion_times)
