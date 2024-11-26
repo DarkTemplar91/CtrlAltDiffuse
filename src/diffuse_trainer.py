@@ -55,9 +55,9 @@ def main(config: TrainerConfig):
 
     checkpoint_callback = ModelCheckpoint(
         dirpath=checkpoint_dir,
-        filename="diffusion_model-psnr-{epoch:02d}-{train_loss:.2f}",
+        filename="diffusion_model-loss-{epoch:02d}-{train_loss:.2f}",
         save_top_k=3,
-        monitor="val_loss",
+        monitor="train_loss",
         mode="max"
     )
 
