@@ -23,7 +23,7 @@ class DiffusionModel(pl.LightningModule):
         self.optim_type = optim_type
 
         # EMA setup
-        """self.ema_model = UNet(
+        self.ema_model = UNet(
             input_channels=self.model.input_channels,
             output_channels=self.model.output_channels,
             widths=self.model.widths,
@@ -34,7 +34,7 @@ class DiffusionModel(pl.LightningModule):
             device=device
         )
         self.ema_model.load_state_dict(self.model.state_dict())
-        self.ema = ema"""
+        self.ema = ema
 
         self.psnr_metric = torchmetrics.image.PeakSignalNoiseRatio()
         self.ssim_metric = torchmetrics.image.StructuralSimilarityIndexMeasure(data_range=1.0)
@@ -109,11 +109,11 @@ class DiffusionModel(pl.LightningModule):
     """def state_dict(self, **kwargs):
         state = super().state_dict()
         state["ema_model_state"] = self.ema_model.state_dict()
-        return state
+        return state"""
 
     def load_state_dict(self, state_dict, **kwargs):
         ema_state = state_dict.pop("ema_model_state", None)
         super().load_state_dict(state_dict)
-        if ema_state:
+        """if ema_state:
             self.ema_model.load_state_dict(ema_state)
             self.ema_model.to(self.device)"""

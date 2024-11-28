@@ -36,13 +36,13 @@ class UNet(nn.Module):
             device=self.device
         )
 
-        #self.embedding_projection = nn.Conv2d(embedding_dims, widths[0], kernel_size=1)
+        self.embedding_projection = nn.Conv2d(embedding_dims, widths[0], kernel_size=1)
 
         self.initial_conv = nn.Conv2d(input_channels, widths[0], kernel_size=1)
 
         # Downsampling layers
         self.down_blocks = nn.ModuleList()
-        current_width = widths[0] + embedding_dims
+        current_width = widths[0] * 2
         for width in widths[:-1]:
             self.down_blocks.append(DownBlock(width=width, block_depth=block_depth, input_width=current_width))
             current_width = width
@@ -69,7 +69,7 @@ class UNet(nn.Module):
 
         embedding = self.embedding(noise_variances)
         embedding = embedding.permute(0, 3, 1, 2)
-        #embedding = self.embedding_projection(embedding)
+        embedding = self.embedding_projection(embedding)
         embedding = F.interpolate(embedding, size=images.shape[2:], mode="nearest")
 
         # Initial convolution and concatenate with embedding
