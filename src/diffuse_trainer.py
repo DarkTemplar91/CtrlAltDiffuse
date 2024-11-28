@@ -36,7 +36,7 @@ def main(config: TrainerConfig):
         unet_model = UNet(
             input_channels=3,
             output_channels=3,
-            widths=[16, 32, 32, 64, 128, 128],
+            widths=[32, 64, 96, 128],
             block_depth=2,
             embedding_min_frequency=1e-2,
             embedding_max_frequency=1e4,
