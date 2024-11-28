@@ -12,6 +12,7 @@ from diffusion_model.diffusion_model import DiffusionModel
 
 
 def main(config: TrainerConfig):
+    torch.set_float32_matmul_precision("high")
     if config.dataset_type == "CelebA":
         data_module = CelebsDataModule(config)
     elif config.dataset_type == "Flowers102":
