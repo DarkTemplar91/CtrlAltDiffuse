@@ -22,14 +22,14 @@ class FlowersDataModule(pl.LightningDataModule):
         self.transform_train = transforms.Compose([
             transforms.RandomResizedCrop(config.image_resolution, antialias=True),
             transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
+            transforms.ToImage(),
             transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
         ])
 
         self.transform_val = transforms.Compose([
             transforms.Resize(size=config.image_resolution, antialias=True),
             transforms.CenterCrop(size=config.image_resolution),
-            transforms.ToTensor(),
+            transforms.ToImage(),
             transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
         ])
 
