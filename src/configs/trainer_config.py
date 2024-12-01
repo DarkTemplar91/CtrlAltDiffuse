@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Literal, Optional
 
 DatasetType = Literal["CelebA", "Flowers102"]
-OptimizerType = Literal["adam", "sgd"]
+OptimizerType = Literal["Adam", "AdamW", "SGD"]
 
 
 @dataclass
@@ -23,8 +23,7 @@ class TrainerConfig:
     num_workers: int = 4
     """Number of samples per batch."""
     epochs: int = 10
-    """Number of training epochs."""
     learning_rate: float = 0.001
     """Learning rate for the optimizer."""
-    optimizer: OptimizerType = "adam"
-    """Optimizer type (e.g., "adam", "sgd")."""
+    optimizer: OptimizerType = "Adam"
+    """Optimizer type (e.g., "Adam", "Adam"", "SGD")."""

@@ -1,6 +1,6 @@
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
-from torchvision import transforms
+from torchvision.transforms import v2 as transforms
 from torchvision.datasets import CelebA
 
 from configs import TrainerConfig
@@ -20,14 +20,14 @@ class CelebsDataModule(pl.LightningDataModule):
             transforms.RandomResizedCrop(config.image_resolution, antialias=True),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
-            transforms.Normalize(0.5, 0.5),
+            transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
         ])
 
         self.transform_val = transforms.Compose([
             transforms.Resize(size=config.image_resolution, antialias=True),
             transforms.CenterCrop(size=config.image_resolution),
             transforms.ToTensor(),
-            transforms.Normalize(0.5, 0.5)
+            transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
         ])
 
     def prepare_data(self):
