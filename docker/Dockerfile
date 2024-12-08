@@ -13,42 +13,48 @@ RUN apt-get update && apt-get install --no-install-recommends --no-install-sugge
     build-essential \
     python3.11 \
     python3-pip \
+    wget \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Create a non-root user
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+# Install gdown for Google Drive file downloads
+RUN pip3 install --no-cache-dir gdown
 
-# Install PyTorch with dynamic CUDA version support, without caching
-ARG TORCH_CUDA_VERSION
-RUN if [ "$CUDA_VERSION" = "12.1.0" ]; then \
-        TORCH_CUDA_VERSION=cu121; \
-    else \
-        TORCH_CUDA_VERSION=cu118; \
-    fi \
-    && pip3 --no-cache-dir install torch torchvision --index-url https://download.pytorch.org/whl/${TORCH_CUDA_VERSION}
+# Create necessary directories
+RUN mkdir -p /workspace/outputs/celeba /workspace/outputs/flowers
 
-# Create the necessary cache directory for gdown and set ownership
-RUN mkdir -p /home/appuser/.cache/gdown && chown -R appuser:appuser /home/appuser/.cache
-
+# Download models and place them in the respective directories
+RUN gdown --id 1ZcAxwv1JerjY-2EzJ_ybUCYPHXUESgHi -O /workspace/outputs/celeba/diffusion_model_celeba.ckpt \
+    && gdown --id 1ME3R0VSQCE6Ve8W6F3aZTLVpC65jNV70 -O /workspace/outputs/flowers/diffusion_model_flowers.ckpt
 
 # Set working directory
 WORKDIR /workspace
 
-# Install project dependencies without caching
-COPY requirements.txt /workspace/
-RUN if [ -f "requirements.txt" ]; then pip3 --no-cache-dir install -r requirements.txt; fi
-
 # Copy the project files into the container
 COPY .. /workspace
-# Change ownership of the workspace directory to appuser
-RUN chown -R appuser:appuser /workspace
 
-# Install the project in editable mode
-RUN pip3 install --no-cache-dir -e . && rm -rf /tmp/*
+# Create a non-root user and change ownership of the workspace directory
+RUN groupadd -r appuser && useradd -r -g appuser appuser \
+    && chown -R appuser:appuser /workspace
+
+# Create Matplotlib configuration directory and set ownership
+RUN mkdir -p /workspace/matplotlib_config \
+    && chown -R appuser:appuser /workspace/matplotlib_config
+
+# Install project dependencies without caching
+COPY requirements.txt /workspace/
+RUN pip3 install --no-cache-dir -r /workspace/requirements.txt \
+    && pip3 install --no-cache-dir -e . \
+    && rm -rf /tmp/*
+
+# Expose Flask port
+EXPOSE 5005
+
+ENV FLASK_APP=app/app.py
+ENV FLASK_RUN_HOST=0.0.0.0
+ENV FLASK_RUN_PORT=5005
 
 # Change to non-root user
 USER appuser
 
-# Set entry point for either interactive shell or commands (training/generation)
-ENTRYPOINT [ "/bin/bash", "-c" ]
-CMD ["bash"]
+# Set entry point for Flask application
+ENTRYPOINT ["python3", "app/app.py"]
