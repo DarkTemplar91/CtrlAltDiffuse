@@ -21,6 +21,7 @@ class ReferenceDiffusionModel(pl.LightningModule):
             num_train_timesteps = 1000
         )
 
+        # Metrics for evaluation
         self.psnr_metric = torchmetrics.image.PeakSignalNoiseRatio()
         self.ssim_metric = torchmetrics.image.StructuralSimilarityIndexMeasure(data_range=1.0)
 

@@ -12,6 +12,7 @@ from diffusion_model.diffusion_model import DiffusionModel
 
 
 def main(config: TrainerConfig):
+    """A function that can train a diffusion model on two datasets with the specified parameters"""
     torch.set_float32_matmul_precision("high")
     if config.dataset_type == "CelebA":
         data_module = CelebsDataModule(config)
@@ -30,9 +31,14 @@ def main(config: TrainerConfig):
 
     device = torch.device("cuda")
 
+    # Load from checkpoint if it was specified
     if config.checkpoints:
         diffusion_model = DiffusionModel.load_from_checkpoint(config.checkpoints)
     else:
+        """
+        Unet with layers of 32, 64, 96 and 128
+        This differs from the reference model, but it has better training times
+        """
         unet_model = UNet(
             input_channels=3,
             output_channels=3,
@@ -58,6 +64,7 @@ def main(config: TrainerConfig):
         dirpath=checkpoint_dir,
         filename="diffusion_model-loss-{epoch:02d}-{train_loss:.2f}",
         save_top_k=3,
+        save_last=True,
         monitor="val_psnr",
         mode="max"
     )

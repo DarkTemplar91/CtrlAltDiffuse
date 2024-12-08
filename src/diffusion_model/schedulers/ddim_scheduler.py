@@ -3,6 +3,9 @@ from tqdm import tqdm
 
 
 class DDIMScheduler:
+    """
+    Implementation of the DDIM scheduler for quicker inference.
+    """
     def __init__(self, num_timesteps=1000, beta_start=0.0001, beta_end=0.02,
                  max_signal_rate=0.95, min_signal_rate=0.02,
                  device="cuda:0"):
@@ -17,6 +20,7 @@ class DDIMScheduler:
         self.device = torch.device(device)
 
     def diffusion_schedule(self, diffusion_times):
+        """Creat the noise and signal rates used for the diffusion process"""
         start_angle = torch.acos(self.max_signal_rate)
         end_angle = torch.acos(self.min_signal_rate)
 
@@ -28,16 +32,19 @@ class DDIMScheduler:
         return noise_rates, signal_rates
 
     def denoise(self, noisy_images, noise_rates, signal_rates, model):
+        """Remove noise from the image"""
         pred_noises = model(noisy_images, noise_rates ** 2)
 
         pred_images = (noisy_images - noise_rates * pred_noises) / signal_rates
         return pred_noises, pred_images
 
     def reverse_diffusion(self, initial_noise, diffusion_steps, model):
+        """Apply iterative implicit reverse diffusion"""
         num_images = initial_noise.shape[0]
         step_size = 1.0 / diffusion_steps
         next_noisy_images = initial_noise
 
+        # Iteratively denoise the image.
         for step in tqdm(range(diffusion_steps)):
             noisy_images = next_noisy_images
             diffusion_times = torch.ones((num_images, 1, 1, 1), device=self.device) - step * step_size

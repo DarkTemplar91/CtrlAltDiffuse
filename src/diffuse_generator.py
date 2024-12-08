@@ -10,6 +10,7 @@ import torch
 from PIL import Image
 from diffusion_model.diffusion_model import DiffusionModel
 
+
 def load_model_checkpoint(model, checkpoint_path: Path):
     checkpoint = torch.load(checkpoint_path, map_location=torch.device('cpu'))
     model.load_state_dict(checkpoint["state_dict"])
@@ -34,6 +35,7 @@ def main(config: GeneratorConfig):
             resolution=config.image_resolution
         )
 
+    # Plotting the generated images in grids
     cols = 4
     rows = math.ceil(num_images / cols)
     fig, axes = plt.subplots(rows, cols, figsize=(8 * cols, 8 * rows))
@@ -61,13 +63,13 @@ def entrypoint():
     main(tyro.cli(GeneratorConfig))
 
 
-
 def clear_generated_images():
     """Clears old generated images."""
     output_dir = Path("static/generated_images")
     if output_dir.exists():
         for file in output_dir.glob("*.png"):
             file.unlink()
+
 
 def generate_images(checkpoint, num_steps, seed, num_images, unique_id):
     torch.manual_seed(seed)
@@ -102,7 +104,6 @@ def generate_images(checkpoint, num_steps, seed, num_images, unique_id):
         image_paths.append(relative_path)
 
     return image_paths
-
 
 
 if __name__ == '__main__':

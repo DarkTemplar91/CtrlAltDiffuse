@@ -13,11 +13,10 @@ def main(
         num_samples: int = 1,
         seed: int = 0,
 ):
-    """Generates images from a trained diffusion model."""
+    """Generates images from a trained reference diffusion model."""
 
     torch.manual_seed(seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    #device = torch.device("cpu")
     model = ReferenceDiffusionModel().to(device)
 
     checkpoint = torch.load(checkpoint, map_location=device)
@@ -36,7 +35,7 @@ def main(
             return_dict=False
         )
 
-    # Képek grid formában mentése
+    # Plotting the generated images in grids
     images = torch.stack([tv.transforms.functional.to_tensor(pil_image) for pil_image in pil_images])
     image_grid = tv.utils.make_grid(images, nrow=math.ceil(math.sqrt(num_samples)))
 
