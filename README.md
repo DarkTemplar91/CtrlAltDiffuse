@@ -184,7 +184,19 @@ In the notebook, we did the following:
 
 1. **Download the Reference Model**  
    You can download the reference model from the following link:  
-   [Download Reference Model](https://bmeedu-my.sharepoint.com/:u:/g/personal/somodi_istvan_edu_bme_hu/EZko3h8MZEhEjZ3oVcmg2cYBv6-ZgrymSShTXZncQdLJlg).
+   [Download Flowers Reference Model](https://bmeedu-my.sharepoint.com/:u:/g/personal/somodi_istvan_edu_bme_hu/EZko3h8MZEhEjZ3oVcmg2cYBv6-ZgrymSShTXZncQdLJlg).
+
+   You can download the reference model from the following link:  
+   [Download CelebA Model](https://drive.google.com/file/d/1ZcAxwv1JerjY-2EzJ_ybUCYPHXUESgHi).
+
+1.w **Download the Last Model**  
+
+   You can download the  model from the following link:  
+   [Download Flowers Model](https://drive.google.com/file/d/1ME3R0VSQCE6Ve8W6F3aZTLVpC65jNV70).
+
+   [Download CelebA Model](https://drive.google.com/file/d/1ZcAxwv1JerjY-2EzJ_ybUCYPHXUESgHi).
+
+
 2. **Benchmarking Notebook**  
    To evaluate the Reference model, we used the ```benchmark_FID_IS_KID.ipynb``` notebook. This notebook calculates three key metrics:
    - **FID (Frechet Inception Distance)**: Measures the distance between real and generated images in feature space. Lower FID scores indicate closer similarity and better-quality generated images.
@@ -214,7 +226,7 @@ These scores provide a baseline for evaluating the model's quality in generating
      ```
 
 3. **How to evaluate the models?**
-   - Evaluation metrics, including FID, IS, and KID, are available in the `benchmark_FID_IS_KID.ipynb` notebook. Run each cell to compute these metrics, which assess the quality and diversity of the generated images.
+   - Evaluation metrics, including FID, IS, and KID, are available in the `benchmark_<dataser>_FID_IS_KID.ipynb` notebook. Run each cell to compute these metrics, which assess the quality and diversity of the generated images.
 
 # Diffusion Model Image Generation GUI
 
@@ -228,7 +240,9 @@ The GUI provides an intuitive interface to generate images using pre-trained dif
 ### Local Deployment
 1. Run the Flask application locally:
    ```bash
-   python app/app.py 
+   pip install -e .
+   cd app
+   python app.py 
    ```
 Note: Its important that you start the app.py from root of repo.
 2. Open your browser and navigate to [http://localhost:5005](http://localhost:5005).
@@ -275,7 +289,7 @@ Note: Its important that you start the app.py from root of repo.
 ---
 
 ## GUI Preview
-![GUI Preview](/gui_preview_image.png)
+![GUI Preview](plots/gui_preview_image.png)
 
 *Example of the GUI interface for generating images.*
 
