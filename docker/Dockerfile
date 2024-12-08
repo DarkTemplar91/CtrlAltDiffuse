@@ -57,4 +57,4 @@ ENV FLASK_RUN_PORT=5005
 USER appuser
 
 # Set entry point for Flask application
-CMD ["flask", "run"]
+ENTRYPOINT ["python3", "app/app.py"]
