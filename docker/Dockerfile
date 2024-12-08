@@ -27,16 +27,15 @@ RUN if [ "$CUDA_VERSION" = "12.1.0" ]; then \
     fi \
     && pip3 --no-cache-dir install torch torchvision --index-url https://download.pytorch.org/whl/${TORCH_CUDA_VERSION}
 
+# Install Flask and other Python dependencies
+COPY requirements.txt /workspace/
+RUN pip3 --no-cache-dir install -r /workspace/requirements.txt
+
 # Create the necessary cache directory for gdown and set ownership
 RUN mkdir -p /home/appuser/.cache/gdown && chown -R appuser:appuser /home/appuser/.cache
 
-
 # Set working directory
 WORKDIR /workspace
-
-# Install project dependencies without caching
-COPY requirements.txt /workspace/
-RUN if [ -f "requirements.txt" ]; then pip3 --no-cache-dir install -r requirements.txt; fi
 
 # Copy the project files into the container
 COPY .. /workspace
@@ -46,9 +45,11 @@ RUN chown -R appuser:appuser /workspace
 # Install the project in editable mode
 RUN pip3 install --no-cache-dir -e . && rm -rf /tmp/*
 
+# Expose Flask port
+EXPOSE 5002
+
 # Change to non-root user
 USER appuser
 
-# Set entry point for either interactive shell or commands (training/generation)
-ENTRYPOINT [ "/bin/bash", "-c" ]
-CMD ["bash"]
+# Set entry point for Flask application
+ENTRYPOINT ["python3", "app/app.py"]
