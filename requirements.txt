@@ -4,3 +4,4 @@ tyro==0.8.11
 scipy==1.14.1
 torch-fidelity
 flask
+matplotlib

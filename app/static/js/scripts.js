@@ -34,3 +34,14 @@ document.getElementById('generate-form').addEventListener('submit', async (event
         document.getElementById('results').innerText = `Error: ${error.message}`;
     }
 });
+
+// Automatikusan frissítse a default checkpoint mezőt a dataset kiválasztása alapján
+document.getElementById('dataset').addEventListener('change', (event) => {
+    const dataset = event.target.value;
+    const defaultCheckpointDiv = document.getElementById('default-checkpoint');
+    if (dataset === "celeba") {
+        defaultCheckpointDiv.textContent = "Default: celeba checkpoint";
+    } else if (dataset === "flowers") {
+        defaultCheckpointDiv.textContent = "Default: flowers checkpoint";
+    }
+});

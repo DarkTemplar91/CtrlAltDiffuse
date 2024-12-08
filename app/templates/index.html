@@ -12,9 +12,17 @@
         <h1 class="text-center mb-4">Diffusion Model Image Generation</h1>
         <form id="generate-form" enctype="multipart/form-data" class="p-4 border rounded bg-light">
             <div class="mb-3">
+                <label for="dataset" class="form-label">Dataset:</label>
+                <select id="dataset" name="dataset" class="form-select">
+                    <option value="celeba" selected>CelebA</option>
+                    <option value="flowers">Flowers102</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
                 <label for="checkpoint" class="form-label">Checkpoint:</label>
-                <input type="file" id="checkpoint" name="checkpoint" class="form-control" required>
-                <div class="form-text">Upload your trained model checkpoint (.ckpt)</div>
+                <input type="file" id="checkpoint" name="checkpoint" class="form-control">
+                <div class="form-text" id="default-checkpoint">Default: celeba checkpoint</div>
             </div>
 
             <div class="mb-3">
