@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, jsonify
 from pathlib import Path
-
+import os
 from diffuse_generator import generate_images
 
-app = Flask(__name__)
+# Explicitly set the static folder path
+app = Flask(__name__, static_folder=os.path.join(os.getcwd(), "app/static"))
 
 # Default checkpoints for each dataset
 DEFAULT_CHECKPOINTS = {
@@ -48,7 +49,9 @@ def generate():
             num_images=num_images
         )
 
-        return jsonify({"image_paths": [str(path) for path in image_paths]})
+        # Return relative paths for front-end rendering
+        relative_paths = [os.path.relpath(path, os.getcwd()) for path in image_paths]
+        return jsonify({"image_paths": relative_paths})
     except Exception as e:
         app.logger.error(f"Error during image generation: {str(e)}")
         return jsonify({"error": str(e)}), 500

@@ -20,10 +20,11 @@ document.getElementById('generate-form').addEventListener('submit', async (event
         if (data.image_paths) {
             data.image_paths.forEach(path => {
                 const img = document.createElement('img');
-                img.src = '/' + path;  // Flask static útvonal
+                img.src = '/' + path;  // Flask static path
                 img.alt = 'Generated Image';
                 img.style.display = 'block';
                 img.style.marginBottom = '10px';
+                img.style.maxWidth = '100%';
                 resultsDiv.appendChild(img);
             });
         } else {
@@ -35,7 +36,7 @@ document.getElementById('generate-form').addEventListener('submit', async (event
     }
 });
 
-// Automatikusan frissítse a default checkpoint mezőt a dataset kiválasztása alapján
+// Update default checkpoint text when dataset changes
 document.getElementById('dataset').addEventListener('change', (event) => {
     const dataset = event.target.value;
     const defaultCheckpointDiv = document.getElementById('default-checkpoint');
