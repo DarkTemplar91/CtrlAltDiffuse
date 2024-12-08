@@ -82,7 +82,7 @@ This command will open an interactive terminal where you can use the ```diffuse-
 commands directly.
 
 ```bash
-docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda11
+docker run -p 5005:5005 --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda11
 ```
 
 - **`--shm-size=16g`**: Increases the shared memory size to 16 GB, which may be necessary for larger models.
@@ -96,13 +96,13 @@ To use CUDA 12.1, replace `ctrlaltdiffuse-cuda:cuda11` with `ctrlaltdiffuse-cuda
 To start training directly within the container, use the following command:
 
 ```bash
-docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda11 diffuse-train --dataset-type celebs --dataset-path ./data --output ./output
+docker run -p 5005:5005 --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda11 diffuse-train --dataset-type celebs --dataset-path ./data --output ./output
 ```
 
 For CUDA 12.1, use:
 
 ```bash
-docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda12 diffuse-train --dataset-type celebs --dataset-path ./data --output ./output
+docker run -p 5005:5005 --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda12 diffuse-train --dataset-type celebs --dataset-path ./data --output ./output
 ```
 
 ### C. Running in Image Generation Mode
@@ -110,13 +110,13 @@ docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/t
 To run the container for image generation using a trained model, use the following command:
 
 ```bash
-docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda11 diffuse-generate --checkpoints ./checkpoints/checkpoint.pth --image_resolution 256
+docker run -p 5005:5005 --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda11 diffuse-generate --checkpoints ./checkpoints/checkpoint.pth --image_resolution 256
 ```
 
 For CUDA 12.1, use:
 
 ```bash
-docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda12 diffuse-generate --checkpoints ./checkpoints/checkpoint.pth --image_resolution 256
+docker run -p 5005:5005 --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ctrlaltdiffuse-cuda:cuda12 diffuse-generate --checkpoints ./checkpoints/checkpoint.pth --image_resolution 256
 ```
 
 
@@ -228,9 +228,9 @@ The GUI provides an intuitive interface to generate images using pre-trained dif
 ### Local Deployment
 1. Run the Flask application locally:
    ```bash
-   cd app
-   python app.py
+   python app/app.py 
    ```
+Note: Its important that you start the app.py from root of repo.
 2. Open your browser and navigate to [http://localhost:5005](http://localhost:5005).
 
 ---
