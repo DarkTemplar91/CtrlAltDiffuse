@@ -19,10 +19,11 @@ class DiffusionModel(pl.LightningModule):
         self.num_timesteps = num_timesteps
         self.batch_size = batch_size
         self.lr = lr
-        self.scheduler = DDIMScheduler(num_timesteps=num_timesteps, device=device)  # TODO: pass other arguments
+        self.scheduler = DDIMScheduler(num_timesteps=num_timesteps, device=device)  # TODO: pass other arguments?
         self.optim_type = optim_type
 
         # EMA setup
+        # For now, we do not use the EMA model for inference, as it yielded bad results
         self.ema_model = UNet(
             input_channels=self.model.input_channels,
             output_channels=self.model.output_channels,
@@ -36,10 +37,12 @@ class DiffusionModel(pl.LightningModule):
         self.ema_model.load_state_dict(self.model.state_dict())
         self.ema = ema
 
+        # Metrics used to evaluate the models performance
         self.psnr_metric = torchmetrics.image.PeakSignalNoiseRatio()
         self.ssim_metric = torchmetrics.image.StructuralSimilarityIndexMeasure(data_range=1.0)
 
     def update_ema(self):
+        """Updates the ema model weights. Not used as it yields inferior results"""
         with torch.no_grad():
             for ema_param, param in zip(self.ema_model.parameters(), self.model.parameters()):
                 ema_param.data = self.ema * ema_param.data + (1 - self.ema) * param.data
@@ -48,6 +51,7 @@ class DiffusionModel(pl.LightningModule):
         return self.model(x, t)
 
     def generate(self, num_images, diffusion_steps, resolution):
+        """Generate images using the DDIM scheduler"""
         initial_noise = torch.randn((num_images, 3, resolution, resolution), device=self.device)
         generated_images = self.scheduler.reverse_diffusion(initial_noise, diffusion_steps, self.model)
         return generated_images

@@ -4,6 +4,7 @@ import math
 
 
 class SinusoidalEmbedding(nn.Module):
+    """Applies sinusoidal embedding to the input tensor"""
     def __init__(self, embedding_min_frequency: float, embedding_max_frequency: float, embedding_dims: int,
                  device=torch.device('cuda:0')):
         super(SinusoidalEmbedding, self).__init__()

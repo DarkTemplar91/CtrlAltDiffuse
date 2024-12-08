@@ -6,8 +6,9 @@ import torch.nn.functional as F
 class ResidualBlock(nn.Module):
     def __init__(self, input_width: int, width: int):
         super(ResidualBlock, self).__init__()
-        self.match_channels = (input_width != width)
 
+        # If the input and output channels differ, we need apply a convolution layer to match the dimensions
+        self.match_channels = (input_width != width)
         if self.match_channels:
             self.residual_conv = nn.Conv2d(input_width, width, kernel_size=1)
 

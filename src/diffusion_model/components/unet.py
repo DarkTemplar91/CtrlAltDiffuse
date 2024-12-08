@@ -9,6 +9,7 @@ from .up_block import UpBlock
 
 
 class UNet(nn.Module):
+    """Simple UNet architecture for our Diffusion Model."""
     def __init__(self,
                  input_channels: int,
                  output_channels: int,
@@ -67,8 +68,10 @@ class UNet(nn.Module):
     def forward(self, images: torch.Tensor, noise_variances: torch.Tensor) -> torch.Tensor:
         skips = []
 
+        # Apply the sinusoidal embedding
         embedding = self.embedding(noise_variances)
         embedding = embedding.permute(0, 3, 1, 2)
+        # Additional projection. This provides more learnable parameters and potentially better results
         embedding = self.embedding_projection(embedding)
         embedding = F.interpolate(embedding, size=images.shape[2:], mode="nearest")
 
