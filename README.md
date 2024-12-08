@@ -48,12 +48,12 @@ In production, you don't need to build the Docker images manually. Instead, you 
 For CUDA 12.1:
 ```bash
 docker pull ghcr.io/darktemplar91/ctrlaltdiffuse-cuda12:latest
-docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ghcr.io/darktemplar91/ctrlaltdiffuse-cuda12:latest
+docker run -p 5005:5005 --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ghcr.io/darktemplar91/ctrlaltdiffuse-cuda12:latest
 ```
 For CUDA 11.8:
 ```bash
 docker pull ghcr.io/darktemplar91/ctrlaltdiffuse-cuda11:latest
-docker run --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ghcr.io/darktemplar91/ctrlaltdiffuse-cuda11:latest
+docker run -p 5005:5005 --gpus all --shm-size=16g -v /path/to/data:/workspace/data -v /path/to/checkpoints:/workspace/checkpoints -it ghcr.io/darktemplar91/ctrlaltdiffuse-cuda11:latest
 ```
 ### B. Building Docker Images with CUDA Support
 
@@ -215,6 +215,70 @@ These scores provide a baseline for evaluating the model's quality in generating
 
 3. **How to evaluate the models?**
    - Evaluation metrics, including FID, IS, and KID, are available in the `benchmark_FID_IS_KID.ipynb` notebook. Run each cell to compute these metrics, which assess the quality and diversity of the generated images.
+
+# Diffusion Model Image Generation GUI
+
+## Accessing the GUI
+The GUI provides an intuitive interface to generate images using pre-trained diffusion models. Depending on your deployment method, follow the instructions below:
+
+### Docker Deployment
+1. Build or Pull the image, run the Docker container as described in the "Docker" section.
+2. Open your browser and navigate to [http://localhost:5005](http://localhost:5005).
+
+### Local Deployment
+1. Run the Flask application locally:
+   ```bash
+   cd app
+   python app.py
+   ```
+2. Open your browser and navigate to [http://localhost:5005](http://localhost:5005).
+
+---
+
+## GUI Features
+
+### Main Features
+- **Dataset**: Set default path of checkpoint when we are using docker.
+- **Checkpoint Selection**: Use the "Browse" button to select a pre-trained model checkpoint file from your local machine.
+- **Number of Steps**: Define the number of diffusion steps. Higher steps generally improve image quality but take longer.
+- **Random Seed**: Set a random seed for reproducibility or leave it blank for random generation.
+- **Number of Images**: Specify the number of images to generate in a single run.
+- **Generate Button**: Click the "Generate Images" button to create images based on the selected parameters.
+- **Preview of Generated Images**: View the generated images directly in the browser.
+
+### Additional Notes
+- The generated images are saved in the `app/static/generated_images/` directory within the container or local setup.
+- Default checkpoints are preloaded for CelebA and Flowers datasets, but you can upload custom models as needed.
+
+---
+
+## Example Workflow
+
+### Steps to Generate Images
+1. **Checkpoint Selection**:
+   - Use the "Checkpoint" field to upload the desired checkpoint file.
+   - If no file is selected, the default CelebA or Flowers checkpoint will be used.(The Docker image contains both checkpoint)
+
+2. **Set Parameters**:
+   - **Number of Steps**: Choose the number of diffusion steps (e.g., 1000).
+   - **Random Seed**: Set a seed for reproducibility or leave it blank for random behavior.
+   - **Number of Images**: Specify how many images you want to generate.
+
+3. **Generate Images**:
+   - Click the "Generate Images" button.
+   - Wait for the images to appear below the form.
+
+4. **Inspect and Save**:
+   - Right-click on any generated image to save it.
+   - Alternatively, find all images in the `app/static/generated_images/` directory.
+
+---
+
+## GUI Preview
+![GUI Preview](/gui_preview_image.png)
+
+*Example of the GUI interface for generating images.*
+
 
 # Administrative Informations
 

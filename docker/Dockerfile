@@ -32,12 +32,13 @@ WORKDIR /workspace
 # Copy the project files into the container
 COPY .. /workspace
 
-# Change ownership of the workspace directory to appuser
+# Create a non-root user and change ownership of the workspace directory
 RUN groupadd -r appuser && useradd -r -g appuser appuser \
-    && chown -R appuser:appuser /workspace \
+    && chown -R appuser:appuser /workspace
 
-# Create Matplotlib configuration directory
-RUN mkdir -p /workspace/matplotlib_config && chown -R appuser:appuser /workspace/matplotlib_config
+# Create Matplotlib configuration directory and set ownership
+RUN mkdir -p /workspace/matplotlib_config \
+    && chown -R appuser:appuser /workspace/matplotlib_config
 
 # Install project dependencies without caching
 COPY requirements.txt /workspace/
@@ -45,14 +46,13 @@ RUN pip3 install --no-cache-dir -r /workspace/requirements.txt \
     && pip3 install --no-cache-dir -e . \
     && rm -rf /tmp/*
 
-RUN chown -R appuser:appuser /workspace
-
 # Expose Flask port
 EXPOSE 5005
 
 ENV FLASK_APP=app/app.py
 ENV FLASK_RUN_HOST=0.0.0.0
 ENV FLASK_RUN_PORT=5005
+
 # Change to non-root user
 USER appuser
 
